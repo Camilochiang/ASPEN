@@ -1,0 +1,6 @@
+https://www.allaboutcircuits.com/projects/flash-freeze-photography-with-an-arduino/
+https://forums.raspberrypi.com/viewtopic.php?t=197126
+
+So current goes where there is less resistance
+- If the red cable is connected to 3.3 , the black out of the resistance to GND we can measure the the other (GND?) and it should not give any ampers no voltage.
+- But once that you take the picture, the camera should short the central pin with the GND. therefore our input should mark something!

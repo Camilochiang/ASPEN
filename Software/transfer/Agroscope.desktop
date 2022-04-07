@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=ASPEN
+Comment=AgroScope PhENotyping tool
+Exec=/bin/bash /etc/profile.d/Agroscope.sh
+Icon=/home/aspen/Agroscope/ASPEN/Software/Images/icon.ico
+Terminal=false
+Categories=Education;
+

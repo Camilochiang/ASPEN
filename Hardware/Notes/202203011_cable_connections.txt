@@ -1,0 +1,27 @@
+ALTUM:
+	- 3 Cables
+		Power
+		Event trigger
+		DSL2
+REALSENSE
+	- 1 Cable
+		USB
+BATTERIES
+	- 2/1 Cable(s)* 
+		Power (2 cables)
+		SMBus : 3 cables. SCL + SDA and the battery need to be ground it to the gnd of the card!
+	* The batteries have the same I2C address, therefore we can work with one connected.4
+
+BMI088
+	- 1 cable2
+		I2C
+SONY CAMERA
+	- 3 cables: 
+		one for the hotshoe
+		one for triggering
+		one for power. - JACK?
+LIDAR:
+	- 3 cables
+		Ethernet
+		Power
+		Sync is not need it
