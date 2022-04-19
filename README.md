@@ -14,7 +14,7 @@ ASPEN project rely in several other works, here mentioned:
 - [Yolov5](https://github.com/ultralytics/yolov5)
 - [R3Live](https://github.com/hku-mars/r3live)
 - [Pixloc](https://github.com/cvg/pixloc)
-- [Sort] (https://github.com/abewley/sort)
+- [Sort](https://github.com/abewley/sort)
 
 ## Warning:
 This repository is research in process!
