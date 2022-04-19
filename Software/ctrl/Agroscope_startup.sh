@@ -2,7 +2,7 @@
 # This script configure Jetson xavier NX at booting time.
 
 # Starting
-log=/home/ubuntu/Agroscope/ASPEN/Software/ctrl/log.log
+log=/home/$USER/Agroscope/ASPEN/Software/ctrl/log.log
 export DISPLAY=:1
 
 # Waiting for desktop : This 5 lines were for using with systemd, but we change to icon so tecnically is not necessary
@@ -21,24 +21,47 @@ done
 	export ROS_MASTER_URI=http://localhost:11311 >> $log 2>&1
 	export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH >> $log 2>&1
 	export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.6 >> $log 2>&1
-	sudo ifconfig eth0 192.168.1.30
+	#sudo netplan apply
 	echo "$now: ROS melodic prepared" >> $log
 	# Load livox and realsense drivers
 	# Livox 
 	source /home/ubuntu/Agroscope/Data_processing/2_realtime/ROS_spaces/ROS_workspace_3/devel/setup.bash >> $log 2>&1
 	#source "/home/ubuntu/Agroscope/Data_processing/2_realtime/ROS/devel/setup.bash" >> $log 2>&1
 	# BMI088
-	#source "/home/ubuntu/Agroscope/ASPEN/Software/ROS/devel/setup.bash" >> $log 2>&1	
+	#source "/home/$USER/Agroscope/ASPEN/Software/ROS/devel/setup.bash" >> $log 2>&1	
 	now=$(date)	
 	echo "$now: ROS drivers loaded [Livox, BMIO088]" >> $log
 	#Python env
-	source /home/ubuntu/Agroscope/Python_venvironments/YOLO_v5_venv/bin/activate >> $log 2>&1
+	source /home/$USER/Agroscope/Python_venvironments/YOLO_v5_venv/bin/activate >> $log 2>&1
 	now=$(date)
 	echo "$now: Agroscope venv loaded" >> $log
-	roslaunch livox_ros_driver livox_lidar_msg.launch >> $log 2>&1 &
-	roslaunch realsense2_camera rs_agroscope.launch >> $log 2>&1 &
+	
+	roscore >> $log 2>&1 &
+	roslaunch realsense2_camera rs_agroscope.launch --wait >> $log 2>&1 &
+	roslaunch livox_ros_driver livox_lidar_msg.launch --wait >> $log 2>&1 &
 	now=$(date)
 	echo "$now: Livox, RS and IMU ROSlaunch started" >> $log 
+
+	# Wait until the camera topic is available
+	(
+	val=0
+	while true; do
+		topiclist=$(rostopic list)
+		topiclist=(${topiclist/|/ })
+		if [ ${topiclist[0]} == "/camera/color/camera_info" ]; then
+			val=100; sleep 1; echo $val
+			break
+		fi
+	done 
+	) | 
+	zenity --progress \
+		--title="Loading drivers" \
+		--text='Looking for availability of ROS topics' \
+		--pulsate \
+		--auto-kill=true \
+		--auto-close=true
+
+	# And now wait for ever :D
 	while true;do
 		sleep 1
 	done

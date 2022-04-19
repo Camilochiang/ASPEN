@@ -4,7 +4,7 @@ After=multi-user.target
 
 [Service]
 Type=simple
-User=ubuntu
+User=aspen
 ExecStart=/home/aspen/Agroscope/ASPEN/Software/ctrl/Agroscope_startup.sh
 Restart=always
 RestartSec=3

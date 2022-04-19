@@ -6,6 +6,9 @@
 # Release date : 
 # Description: A Class (GUI) that work as "orchestrer" for other classes (ROS sensors, GPIO, etc, ML)
 
+# WARNING:
+#kivy do not accept true as a boolean. You have to compare it to a string
+
 ## Libraries
 # Basic
 import pexpect
@@ -15,12 +18,19 @@ import time
 import numpy as np
 import argparse
 import json
+import sys
+import os
 
 # Kivy
 import kivy
 kivy.require('2.0.0')
 from kivy.app import App
-from kivy.config import Config
+from kivy.config import Config  
+#Config.set('graphics', 'fullscreen', 2)
+Config.set('graphics', 'width', '800')
+Config.set('graphics', 'height', '480')
+Config.set('kivy', 'log_level', 'info')
+Config.write()
 from kivy.core.window import Window
 from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.label import Label
@@ -30,18 +40,14 @@ from kivy.graphics.texture import Texture
 from kivy.uix.button import Button
 from kivy.graphics import Color, Rectangle
 from kivy.clock import Clock
-Config.set('graphics', 'fullscreen', 2)
-Config.set('kivy', 'log_level', 'info')
-Config.write()
+
 
 #ROS
 import rospy
-
+from sensor_msgs.msg import Image as Image_ROS
 #ASPEN
 #from lib import sensors
 from lib import helpers
-from lib.yolov5 import detect_ASPEN
-
 ### Python sensors
 #Altum = sensors.altum_camera(device ='Camera_1', address = "http://192.168.10.254",  path = directory)
 #Sony = sensors.sony_camera()
@@ -54,9 +60,13 @@ class MainApp(App):
         self.pwd = None
         self.last_frame = None
         # self.default variables
-        self.default_distance = depth_limit # In metters
+        self.default_distance = float(depth_limit) # In metters
         self.crop = str(model)
         self.conf_thres = float(conf_thres)
+        if str(model) == 'None':
+            self.machine_learning = False
+        else:
+            self.machine_learning = True
         self.default_time_sony = 5
         self.default_time_altum = 5
         self.count = 0
@@ -75,7 +85,7 @@ class MainApp(App):
             print('Writing to' + self.pwd)
             # Start recording
             # If is possible we should record compressed topics for camara/color and camara/depth, if not , raw will do it
-            self.record_bag = pexpect.spawn('rosbag record -o ' +  self.pwd + '/captured/ROS/' + ' /livox/lidar /imu /camera/color/rgb/image_raw/compressed /camera/depth/image_rect_raw/compressed /rosout_agg __name:=my_bag')
+            self.record_bag = pexpect.spawn('rosbag record -j -o ' +  self.pwd + '/captured/ROS/' + ' /livox/lidar /imu /camera/color/image_raw /camera/depth/image_rect_raw/compressed /rosout_agg __name:=my_bag')
             while not self.record_bag.eof():
                 strLine = self.record_bag.readline()
                 if 'Subscribing to /rosout_agg' in strLine.decode():
@@ -103,8 +113,7 @@ class MainApp(App):
             self.button_distance.disabled = False
             self.button_model.disabled = False
             self.sony.disabled = False
-            self.altum.disabled = False
-            self.status_bar_updater('Ready to GO!', 0,1,0,.2)        
+            self.altum.disabled = False        
 
     def distance_or_time(self,change, sensor,x_center, y_center):
         direction = +1 if sensor == "distance" else -1
@@ -202,17 +211,20 @@ class MainApp(App):
                 self.sony.disabled = True
                 self.altum.disabled = True 
                 self.button_model.disabled = True
-                self.button_counter.disabled = True                
+                self.button_counter.disabled = True
+                self.button_status.disabled = True                
             elif sensor == 'Sony':
                 self.button_distance.disabled = True
                 self.altum.disabled = True 
                 self.button_model.disabled = True
                 self.button_counter.disabled = True
+                self.button_status.disabled = True                
             else:
                 self.button_distance.disabled = True                
                 self.sony.disabled = True
                 self.button_model.disabled = True
                 self.button_counter.disabled = True
+                self.button_status.disabled = True
 
         else:
             self.rl.remove_widget(self.button_distance_down)
@@ -225,6 +237,7 @@ class MainApp(App):
             self.button_counter.disabled = False            
             self.sony.disabled = False
             self.altum.disabled = False
+            self.button_status.disabled = False
 
     def change_model_name(self, new_crop):
         self.crop = new_crop
@@ -232,7 +245,7 @@ class MainApp(App):
 
     def change_model(self, x_center, y_center):
         return 1
-        ##changemodelinsideapp
+        ##ToDO: Change model inside of app
         self.button_model.open = not self.button_model.open     
 
         if self.button_model.open:
@@ -321,13 +334,12 @@ class MainApp(App):
             self.button_status.disabled = False 
 
     def counter_restart(self, _):
-        # We save the important stuff
+        # We save the important stuff and  reiniciate all
         self.previus_counts.append(self.count)
-        self.previus_dics.append(self.YOLOv5.objects_characteristics)
-
-        # We reiniciate all
-        self.count = 0        
-        self.YOLOv5.objects_characteristics = {'id':[], 'class':[], 'size':[]} # a dictionary of lists
+        self.count = 0
+        if self.machine_learning:        
+            self.previus_dics.append(self.YOLOv5.objects_characteristics)
+            self.YOLOv5.objects_characteristics = {'id':[], 'class':[], 'size':[]} # a dictionary of lists
         self.button_counter.text = "Count: \n" + str(self.count)
 
     def status_bar_updater(self, text, r,g,b,a):
@@ -348,15 +360,15 @@ class MainApp(App):
          # Before starting we will run some checkups to be sure that we can proceed
         if self._clockev_ROS_count == 0:
         # We check : CAMERA RGB
-            if "/camera/color/rgb/image_raw" in [item for sublist in rospy.get_published_topics() for item in sublist]:
-                self.status_bar_updater('RGB compressed topic detected', 0,1,0,.2)
+            if "/camera/color/image_raw" in [item for sublist in rospy.get_published_topics() for item in sublist]:
+                self.status_bar_updater('RGB topic detected', 0,1,0,.2)
                 self._clockev_ROS_count += 1
             else:
                 self.status_bar_updater('RGB compressed topic non detected', 1,0,0,.2)
                 self._clockev_ROS.cancel()
         elif self._clockev_ROS_count == 1:
         # DEPTH:
-            if "/camera/depth/rgb/image_rect_raw/compressed" in [item for sublist in rospy.get_published_topics() for item in sublist]:
+            if "/camera/depth/image_rect_raw/compressed" in [item for sublist in rospy.get_published_topics() for item in sublist]:
                 self.status_bar_updater('Depth topic detected', 0,1,0,.2)
                 self._clockev_ROS_count += 1                
             else:
@@ -365,14 +377,14 @@ class MainApp(App):
         elif self._clockev_ROS_count == 2:
         # IMU:
             if "/imu" in [item for sublist in rospy.get_published_topics() for item in sublist]:
-                self.status_bar_updater('Depth topic detected', 0,1,0,.2)
+                self.status_bar_updater('IMU topic detected', 0,1,0,.2)
                 self._clockev_ROS_count += 1                
             else:
-                self.status_bar_updater('Depth topic not present',1,0,0,.2)
+                self.status_bar_updater('IMU topic not present',1,0,0,.2)
                 self._clockev_ROS.cancel()
         elif self._clockev_ROS_count == 3:
         # Lidar:
-            if "/livox_lidar_publisher" in [item for sublist in rospy.get_published_topics() for item in sublist]:
+            if "/livox/lidar" in [item for sublist in rospy.get_published_topics() for item in sublist]:
                 self.status_bar_updater('LiDAR topic detected', 0,1,0,.2)
                 self._clockev_ROS_count += 1                
             else:
@@ -380,14 +392,18 @@ class MainApp(App):
                 self._clockev_ROS.cancel()
         else:
             self.status_bar_updater('Ready to GO!', 0,1,0,.2)
-            self._clockev_ROS.cancel()               
+            self._clockev_ROS.cancel()
+
+    def image_callback(self, msg):
+        self.last_frame = np.frombuffer(msg.data, dtype=np.uint8).reshape(1080, 1920, -1)
+        #self.last_frame = cv2.cvtColor(self.last_frame, cv2.COLOR_BGR2RGB)
 
     def build(self):
         #GUI
         self.rl = RelativeLayout(size =(800, 480))
         self.img1 = Image()
         #self.capture = cv2.VideoCapture(0)
-        Clock.schedule_interval(self.update, 1.0/50.0)
+        Clock.schedule_interval(self.update, 1.0/15.0)
         #self.car= Camera(play=True, index=0, resolution=(800,480))
         #print(self.car)
         #self.rl.add_widget(self.car)
@@ -395,7 +411,7 @@ class MainApp(App):
 
         # Buttons
         # Normal buttons
-        self.button_counter = Button(size_hint =(.1, .1),
+        self.button_counter = helpers.Button(size_hint =(.1, .1),
             pos_hint ={'center_x':.95, 'center_y':.10},
             text ="Count: \n" + str(self.count),
             halign = 'center',            
@@ -403,7 +419,15 @@ class MainApp(App):
             color = [.8,0,0,1],
             background_color = [1,1,0,.2],
             on_press = self.counter_restart)
-        # Button that can open another buttons        
+        self.button_close = helpers.Button(size_hint =(.1, .1),
+            pos_hint ={'center_x':0.95, 'center_y':.95},
+            text ="Close",
+            halign = 'center',
+            bold = True,
+            color = [.8,0,0,1],
+            background_color = [1,1,0,.2],
+            on_press = self.close)
+        # Button that can open another buttons
         self.button_distance = helpers.OpenerButton(size_hint =(.15, .1),
             pos_hint ={'center_x':.825, 'center_y':.10},
             text ='Used ditance: \n' + str(self.default_distance) + 'm',
@@ -456,6 +480,7 @@ class MainApp(App):
         self.rl.add_widget(self.button_model)
         self.rl.add_widget(self.button_distance)
         self.rl.add_widget(self.button_counter)
+        self.rl.add_widget(self.button_close)
         self.rl.add_widget(self.sony)
         self.rl.add_widget(self.altum)
 
@@ -486,18 +511,22 @@ class MainApp(App):
             weights = '/home/ubuntu/Agroscope/ASPEN/Software/models/Tomato.pt'
             data_yaml = '/home/ubuntu/Agroscope/ASPEN/Software/models/Agroscope_tomatoes.yaml'
         else:
-            print('Please select a model. Exiting')
-            quit()
+            print('Going in webcam mode')
 
-        self.YOLOv5 = detect_ASPEN.YOLOv5(weights=weights, conf_thres = self.conf_thres, data_yaml = data_yaml, depth_limit = self.default_distance)
-        self.yolov5_thread = Thread(target = self.YOLOv5.update, args=(), daemon = True)
-        self.yolov5_thread.start()
+        if self.machine_learning:
+            from lib.yolov5 import detect_ASPEN
 
-        #image_reader = rospy.Subscriber("/camera/color/rgb/image_raw", Image_ROS, self.image_callback)
-        #imagedepth_reader = rospy.Subscriber("/camera/depth/rgb/image_rect_raw", Image_ROS, self.imagedepth_callback)
-
-        #self.spin_thread = Thread(target=lambda: rospy.spin(), daemon=True)
-        #self.spin_thread.start()
+            self.YOLOv5 = detect_ASPEN.YOLOv5(weights=weights, conf_thres = self.conf_thres, data_yaml = data_yaml, depth_limit = self.default_distance)
+            self.yolov5_thread = Thread(target = self.YOLOv5.update, args=(), daemon = True)
+            self.yolov5_thread.start()
+            self.button_model.disabled = True
+        else:
+            rospy.init_node('GUI', anonymous=False)
+            image_reader = rospy.Subscriber("/camera/color/image_raw", Image_ROS, self.image_callback)
+            #imagedepth_reader = rospy.Subscriber("/camera/depth/rgb/image_rect_raw", Image_ROS, self.imagedepth_callback)
+            self.spin_thread = Thread(target=lambda: rospy.spin(), daemon=True)
+            self.spin_thread.start()
+            self.button_model.disabled = True
 
         return self.rl
 
@@ -506,36 +535,56 @@ class MainApp(App):
         self._clockev_ROS = Clock.schedule_interval(self.check_up, 1)
         # We will create a directory everytime that we start the app
         self.pwd = helpers.create_folders()
+    
+    def close(self, touch):
+        print('call close')
+        quit()
 
     def on_close(self):
-        #Force the counts to be written
-        self.previus_counts.append(self.count)
-        self.previus_dics.append(self.YOLOv5.objects_characteristics)
-         
-        # Save the counts
-        file_name = time.strftime(r"%Y%m%d_%H_%M_%S", time.localtime()) + '_counts.txt'
-        with open(self.pwd + '/' + file_name, 'w') as f:
-            for idx, _ in enumerate(self.previus_counts):
-                f.write('Total count:' + str(self.previus_counts[idx]) + '\n')
-                f.write(json.dumps(self.previus_dics[idx]) + '\n')
-                f.write('\n')            
+        cv2.destroyAllWindows()
+        if self.machine_learning:
+            #Force the counts to be written
+            self.previus_counts.append(self.count)
+            self.previus_dics.append(self.YOLOv5.objects_characteristics)
+            
+            # Save the counts
+            file_name = time.strftime(r"%Y%m%d_%H_%M_%S", time.localtime()) + '_counts.txt'
+            with open(self.pwd + '/' + file_name, 'w') as f:
+                for idx, _ in enumerate(self.previus_counts):
+                    f.write('Total count:' + str(self.previus_counts[idx]) + '\n')
+                    f.write(json.dumps(self.previus_dics[idx]) + '\n')
+                    f.write('\n')            
 
     def update(self, dt):
-        self.last_frame = self.YOLOv5.imDisplayed
-        self.last_frame = cv2.resize(self.last_frame, (800,480))
-        # convert it to texture
-        buf1 = cv2.flip(self.last_frame, 0)
-        buf = buf1.tostring()
-        texture1 = Texture.create(size=(self.last_frame.shape[1], self.last_frame.shape[0]), colorfmt='bgr') 
-        #if working on RASPBERRY PI, use colorfmt='rgba' here instead, but stick with "bgr" in blit_buffer. 
-        texture1.blit_buffer(buf, colorfmt='bgr', bufferfmt='ubyte')
-        # display image from the texture
-        self.img1.texture = texture1
+        if self.machine_learning:
+            self.last_frame = self.YOLOv5.imDisplayed
+            self.last_frame = cv2.resize(self.last_frame, (800,480))
+
+        # The rosmessage take a moment to arrive
+        try:
+            # convert it to texture
+            buf1 = cv2.flip(self.last_frame, 0)
+            buf = buf1.tostring()
+            texture1 = Texture.create(size=(self.last_frame.shape[1], self.last_frame.shape[0]), colorfmt='bgr') 
+            #if working on RASPBERRY PI, use colorfmt='rgba' here instead, but stick with "bgr" in blit_buffer. 
+            texture1.blit_buffer(buf, colorfmt='bgr', bufferfmt='ubyte')
+            # display image from the texture
+            self.img1.texture = texture1
+        except:
+            pass
+        
+        files = os.listdir(self.pwd + '/captured/ROS/')
+        if len(files) > 0 and self.button_status.text == "Recording: \n OFF":
+            files.sort()
+            if 'active' in files[-1]:
+                self.status_bar_updater('Compressing...PLEASE WAIT', 1,0,0,.2)
+            else:
+                self.status_bar_updater('Ready to GO!', 0,1,0,.2)
 
         # We update the counter
-        self.count = len(self.YOLOv5.objects_characteristics['id'])
-        self.button_counter.text = "Count: \n" + str(self.count)
-
+        if self.machine_learning:        
+            self.count = len(self.YOLOv5.objects_characteristics['id'])
+            self.button_counter.text = "Count: \n" + str(self.count)
 
 if __name__== "__main__":
     parser = argparse.ArgumentParser()
@@ -546,4 +595,8 @@ if __name__== "__main__":
 
     app = MainApp(model = args.model, conf_thres = args.conf_thres, depth_limit = args.depth_limit)
     app.run()
-    app.on_close()    
+    # We need to close the other threads!
+    app.yolov5_thread.close()
+    print("Closing GUI")
+    app.on_close()  
+    sys.exit()  

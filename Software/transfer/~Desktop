@@ -5,6 +5,6 @@ Name=ASPEN
 Comment=AgroScope PhENotyping tool
 Exec=/home/aspen/Agroscope/ASPEN/Software/ctrl/Agroscope_app.sh
 Icon=/home/aspen/Agroscope/ASPEN/Software/Images/icon.ico
-Terminal=true
+Terminal=false
 Categories=Education;
 

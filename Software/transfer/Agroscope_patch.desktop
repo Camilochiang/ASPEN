@@ -3,8 +3,9 @@ Type=Application
 Version=1.0
 Name=ASPEN
 Comment=AgroScope PhENotyping tool
-Exec=/home/aspen/Agroscope/ASPEN/Software/ctrl/Agroscope_app.sh
+Exec=/home/aspen/Agroscope/ASPEN/Software/ctrl/Agroscope_startup.sh
 Icon=/home/aspen/Agroscope/ASPEN/Software/Images/icon.ico
-Terminal=true
+Terminal=false
 Categories=Education;
 
+Name[en_US]=Agroscope_patch.desktop
