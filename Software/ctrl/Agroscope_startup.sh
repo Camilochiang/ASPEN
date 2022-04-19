@@ -48,7 +48,7 @@ done
 	while true; do
 		topiclist=$(rostopic list)
 		topiclist=(${topiclist/|/ })
-		if [ ${topiclist[0]} == "/camera/color/camera_info" ]; then
+		if [ ${topiclist[0]} == "/camera/align_to_color/parameter_descriptions" ]; then
 			val=100; sleep 1; echo $val
 			break
 		fi

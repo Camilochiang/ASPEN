@@ -1,8 +1,7 @@
 <launch>
   <rosparam>
       /camera/stereo_module/laser_power: 0
-      /camera/colorizer/histogram_equalization_enabled: false      
-      /camera/depth/
+      /camera/colorizer/histogram_equalization_enabled: false
   </rosparam>
 
   <arg name="external_manager"    default="false"/>
@@ -56,14 +55,14 @@
   <arg name="allow_no_texture_points"   default="false"/>
   <arg name="ordered_pc"                default="false"/>
 
-  <arg name="enable_sync"               default="false"/>
-  <arg name="align_depth"               default="false"/>
+  <arg name="enable_sync"               default="true"/>
+  <arg name="align_depth"               default="true"/>
 
   <arg name="publish_tf"                default="false"/>
   <arg name="tf_publish_rate"           default="0"/>
 
   <arg name="filters"                   default="disparity, spatial, temporal"/>
-  <arg name="clip_distance"             default="-2"/>
+  <arg name="clip_distance"             default="10"/>
   <arg name="linear_accel_cov"          default="0.01"/>
   <arg name="initial_reset"             default="true"/>
   <arg name="unite_imu_method"          default=""/>

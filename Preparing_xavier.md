@@ -1,8 +1,8 @@
-## Preparing xavier NX
-# Goal
-This file have as goal to describe the software configuration for requiered for using the project ASPEN
+# Preparing xavier NX
+## Goal
+This file have as goal to describe the software configuration that is used in the project ASPEN
 
-# Content
+## Content
 1. General configuration:
 2. ROS
     1. Livox
@@ -16,7 +16,7 @@ This file have as goal to describe the software configuration for requiered for 
 7. Appearence
 8. Icons
 
-# ***1. General configuration:***
+## ***1. General configuration:***
 - Create a copy as indicate here: https://developer.nvidia.com/embedded/learn/get-started-jetson-xavier-nx-devkit#intro
 - Connect to your local wifi
 - We need to copy the repository for the tool
@@ -150,7 +150,7 @@ source ~/.bashrc
 sudo apt install libudev-dev
 ```
 
-# ***2 ROS***
+## ***2 ROS***
 - We will use ROS melodic as has work without problems so far
 ```bash
 sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
@@ -163,7 +163,7 @@ sudo apt install python-rosdep python-rosinstall python-rosinstall-generator pyt
 sudo rosdep init
 rosdep update
 ```
-# 2.1 Livox
+## 2.1 Livox
 - First we need to install Livos-SDK
 ```bash
 cd
@@ -200,7 +200,7 @@ cd
 source .bashrc
 roslaunch livox_ros_driver livox_lidar_msg.launch
 ```
-# 2.1.1 Wifi and Ethernet connection
+### 2.1.1 Wifi and Ethernet connection
 - Preparing our network: From the manual
 ***All Mid-70 sensors are set to static IP address mode by default with an IP address of 192.168.1.XX. The default subnet is 255.255.255.0 and gateways are 192.168.1.1***
 ```bash
@@ -213,9 +213,12 @@ sudo netplan apply
 ```bash
 sudo nano /etc/default/crda and add CH
 ```
-# 2.2  Realsense
-We need two installations: first librealsense
+## 2.2  Realsense
+Originally I installed directly following the instructions here bellow, but there are some problems of realsense and jetson. Also, it didnt have GPU support, so we finally follow version 2:
+
+**Original instructions**
 ```bash
+#We need two installations: first librealsense
 cd Agroscope/Data_processing/2_realtime/tools/software
 git clone https://github.com/Microsoft/vcpkg.git
 cd vcpkg
@@ -223,27 +226,65 @@ cd vcpkg
 ./vcpkg integrate install
 ##CMake projects should use: "-DCMAKE_TOOLCHAIN_FILE=/home/aspen/Agroscope/Data_processing/2_realtime/tools/software/vcpkg/scripts/buildsystems/vcpkg.cmake"
 ./vcpkg install realsense2
-```
-Then ROS wrapper
-```bash
+#Then ROS wrapper
 sudo mv /home/ubuntu/Agroscope/ASPEN/Software/lib/99-realsense-libusb.rules /etc/udev/rules.d/
 sudo udevadm control --reload-rules && udevadm trigger
 sudo apt install ros-$ROS_DISTRO-realsense2-camera
-```
-Then we have to resource the bash file And it should work
-```bash
+#Then we have to resource the bash file And it should work
 source ~/.bashrc
 sudo cp /home/aspen/Agroscope/ASPEN/Software/transfer/rs_agroscope.launch /opt/ros/melodic/share/realsense2_camera/launch
 roslaunch realsense2_camera rs_agroscope.launch
 # sudo nano /opt/ros/melodic/share/realsense2_camera/launch/rs_agroscope.launch
 ```
-What modifications were need it to realsense (Present in rs.launch)?
-- Turn off laser = line 3 set to 0 https://github.com/IntelRealSense/realsense-ros/issues/1195
-- Dpth at 1280 x 720 at 30 FPS : lines 23 to 26
-- RGB at 1920 x 1080 30 FPS : lines 41 to 44
+**Version 2:**
+```bash
+# Following: https://github.com/IntelRealSense/realsense-ros/issues/1967#issuecomment-1029789663
+cd
+echo "export CUDA_HOME=/usr/local/cuda" >> .bashrc
+echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64" >> .bashrc
+echo "export PATH=$PATH:$CUDA_HOME/bin" >> .bashrc
+source .bashrc
 
+cd /home/aspen/Agroscope/Others
+wget https://github.com/IntelRealSense/librealsense/archive/refs/tags/v2.43.0.zip
+unzip v2.43.0.zip
+rm v2.43.0.zip
+cd librealsense-2.43.0
+mkdir build
+cd build
+cmake ../ -DFORCE_RSUSB_BACKEND=ON -DBUILD_PYTHON_BINDINGS:bool=true -DPYTHON_EXECUTABLE=/usr/bin/python3.6 -DCMAKE_BUILD_TYPE=release -DBUILD_EXAMPLES=true -DBUILD_GRAPHICAL_EXAMPLES=true -DBUILD_WITH_CUDA:bool=true
+make -j4
+sudo make install
+# If everything works, the camera should show up
+rs-enumerate-devices
+```
 
-# ***3. Python***
+And now the wrapper: 
+First lets move some files to the card
+```bash
+cd
+sudo cp /home/aspen/Agroscope/ASPEN/Software/lib/99-realsense-libusb.rules /etc/udev/rules.d/
+sudo udevadm control --reload-rules && udevadm trigger
+sudo cp /home/aspen/Agroscope/ASPEN/Software/transfer/rs_agroscope.launch /opt/ros/melodic/share/realsense2_camera/launch
+```
+And now install the wrapper
+```bash
+cd /home/aspen/Agroscope/Others
+wget https://github.com/IntelRealSense/realsense-ros/archive/refs/tags/2.2.23.zip
+unzip realsense-ros-2.2.23.zip
+rm realsense-ros-2.2.23.zip
+cd realsense-ros-2.2.23/realsense2_camera
+# Before continue there are some problems to fix:
+# https://github.com/IntelRealSense/realsense-ros/issues/910 -> add std:: in front of find_if when is missing (2 places I believe)
+catkin_make
+echo "source ~/catkin_ws/devel/setup.bash" >> .bashrc
+cd
+source .bashrc
+
+```
+For details of rs_agroscope.launch, check ASPEN/Software/ctrl/debug/20220419_RS_configuration.md
+
+## ***3. Python***
 - We will be using python 3.6 and a virtual_env so:
 ```bash
 cd
@@ -275,8 +316,29 @@ python3 -m pip install pexpect
 python3 -m pip install pyyaml
 python3 -m pip install rospkg
 python3 -m pip install ffpyplayer
-python3 -m pip install PIL
+python3 -m pip install pillow
+
+#Torch, from https://cognitivexr.at/blog/2021/03/11/installing-pytorch-and-yolov5-on-an-nvidia-jetson-xavier-nx.html
+python3 -m pip install -U future psutil dataclasses typing-extensions pyyaml tqdm seaborn
+wget https://nvidia.box.com/shared/static/p57jwntv436lfrd78inwl7iml6p13fzh.whl -O torch-1.8.0-cp36-cp36m-linux_aarch64.whl 
+python3 -m pip install torch-1.8.0-cp36-cp36m-linux_aarch64.whl
+# Install torchvision v0.9.0 (version for torch 1.8)
+sudo apt install libjpeg-dev zlib1g-dev libpython3-dev libavcodec-dev libavformat-dev libswscale-dev
+python3 -m pip install --upgrade pillow
+git clone --branch v0.9.0 https://github.com/pytorch/vision torchvision
+cd torchvision
+export BUILD_VERSION=0.9.0
+python3 setup.py install --user
+cd ..
+
 ```
+
+Check that torch is working and using CUDA
+```python3
+import torch
+torch.cuda.is_available()
+```
+
 - OpenCV will be used later for R3LIVE, but need to be installed diferently
 ```bash
 cd 
@@ -387,6 +449,25 @@ uncoment alias? change ip?
 # resources usage
 systemctl stop packagekit
 systemctl disable packagekit
+
+
+## Extracting CAMERA INFO
+```bash
+rostopic echo /camera/color/camera_info
+```
+
+## REALSENSE CONFIGURATION
+- you cannot clip distances with the ROS WRAPPER (https://github.com/IntelRealSense/realsense-ros/issues/1412) but you can filter values higher than something for example 10 (m) in our case
+
+## COMPRESING
+So I tried compressing images and with ROS2 jetson can only do 19 FPS at 1920 x 1080. as 15 FPS is more than enough, we will keep both, deepth and nmormal at 15 FPS, recorded as compressed
+
+
+
+
+
+
+
 
 
 
