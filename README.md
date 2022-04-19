@@ -1,7 +1,7 @@
 # ASPEN
  AgroScope PhENotyping tool
 
-ASPEN project has as main goal to create a tool that can be used along diferent domains of agriculture (<br>i.e<br> greenhouses, orchards, field, etc.) as a phenotyping tool for identify, quantify and measure diferent topics of agricultural interestes as for example yield, pest and diseases presence, stress, etc. For this a group of diferent sensors are used to create a 3D reconstruction of the scanned environment what allow in two different configurations (Real time and postprocessing) to obtain relevant data.
+ASPEN project has as main goal to create a tool that can be used along diferent domains of agriculture (<br>i.e</br> greenhouses, orchards, field, etc.) as a phenotyping tool for identify, quantify and measure diferent topics of agricultural interestes as for example yield, pest and diseases presence, stress, etc. For this a group of diferent sensors are used to create a 3D reconstruction of the scanned environment what allow in two different configurations (Real time and postprocessing) to obtain relevant data.
 
 ## UML
 <div align="center">
