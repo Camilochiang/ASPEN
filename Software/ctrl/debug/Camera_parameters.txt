@@ -1,0 +1,65 @@
+
+
+header: 
+  seq: 22
+  stamp: 
+    secs: 1650369018
+    nsecs: 140143871
+  frame_id: "camera_color_optical_frame"
+height: 1080
+width: 1920
+distortion_model: "plumb_bob"
+D: [0.0, 0.0, 0.0, 0.0, 0.0]
+K: [1370.163330078125, 0.0, 944.8233032226562, 0.0, 1368.414794921875, 552.1774291992188, 0.0, 0.0, 1.0]
+R: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+P: [1370.163330078125, 0.0, 944.8233032226562, 0.0, 0.0, 1368.414794921875, 552.1774291992188, 0.0, 0.0, 0.0, 1.0, 0.0]
+binning_x: 0
+binning_y: 0
+roi: 
+  x_offset: 0
+  y_offset: 0
+  height: 0
+  width: 0
+  do_rectify: False
+
+
+header: 
+  seq: 5
+  stamp: 
+    secs: 1650369101
+    nsecs: 124889135
+  frame_id: "camera_depth_optical_frame"
+height: 720
+width: 1280
+distortion_model: "plumb_bob"
+D: [0.0, 0.0, 0.0, 0.0, 0.0]
+K: [887.5817260742188, 0.0, 640.7237548828125, 0.0, 887.5817260742188, 372.0755615234375, 0.0, 0.0, 1.0]
+R: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+P: [887.5817260742188, 0.0, 640.7237548828125, 0.0, 0.0, 887.5817260742188, 372.0755615234375, 0.0, 0.0, 0.0, 1.0, 0.0]
+binning_x: 0
+binning_y: 0
+roi: 
+  x_offset: 0
+  y_offset: 0
+  height: 0
+  width: 0
+  do_rectify: False
+
+
+
+# This is ofc, depending of your camera settings
+
+aspen@aspen-tool:~$ rostopic echo /camera/extrinsics/depth_to_color
+header: 
+  seq: 0
+  stamp: 
+    secs: 0
+    nsecs:         0
+  frame_id: "depth_to_color_extrinsics"
+rotation: [0.9999802112579346, -0.004638982936739922, 0.0042435587383806705, 0.004637665580958128, 0.9999892115592957, 0.0003202624502591789, -0.004244998563081026, -0.0003005758917424828, 0.9999909400939941]
+translation: [0.014934671111404896, 8.440969395451248e-05, 6.933369877515361e-05]
+
+
+/camera/align_to_color/parameter_descriptions
+
+/camera/aligned_depth_to_color/camera_info

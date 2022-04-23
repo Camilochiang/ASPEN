@@ -3,7 +3,8 @@
 This file have as goal to describe the software configuration that is used in the project ASPEN
 
 ## Content
-1. General configuration:
+1. [General configuration](##General-configuration)
+2. [OpenCV](##OpenCV)
 2. ROS
     1. Livox
         1. Ethernet
@@ -16,7 +17,7 @@ This file have as goal to describe the software configuration that is used in th
 7. Appearence
 8. Icons
 
-## ***1. General configuration:***
+## General configuration
 - Create a copy as indicate here: https://developer.nvidia.com/embedded/learn/get-started-jetson-xavier-nx-devkit#intro
 - Connect to your local wifi
 - We need to copy the repository for the tool
@@ -92,8 +93,9 @@ echo 'Section "InputClass"
   Option "EmulateThirdButtonMoveThreshold" "30"
 EndSection' >> 71-touchscreen-waveshare.conf
 ```
-- Utilities
+- Other utilities
 ```bash
+sudo -H pip3 install jetson-stats
 sudo apt-get install qt5-default
 sudo apt-get -y install nano
 sudo apt install htop
@@ -149,6 +151,72 @@ source ~/.bashrc
 #sudo apt-get install autoreconf libudev-dev
 sudo apt install libudev-dev
 ```
+And we may want to check other things
+```bash
+sudo apt-cache show nvidia-jetpack
+sudo apt-cache show nvidia-l4t-jetson-multimedia-api
+nvcc --version
+cat /usr/include/cudnn_version.h
+```
+
+## OpenCV
+OpenCV is used by RealSense and R3Live (>=3.3), so we will start by instaling it from source. That also means that is not necessary to install it using pip later, as it will be already
+```bash
+cd 
+cd Agroscope/Data_processing/2_realtime/tools/software
+wget https://github.com/opencv/opencv/archive/3.4.16.zip
+unzip 3.4.16.zip
+rm 3.4.16.zip
+cd opencv-3.4.16
+mkdir build
+cd build
+cmake -D CMAKE_BUILD_TYPE=RELEASE \
+-D CMAKE_INSTALL_PREFIX=/usr/local \
+-D PYTHON_EXECUTABLE=/usr/bin/python3.6 \
+-D PYTHON_DEFAULT_EXECUTABLE=$(which python3) \
+-D WITH_CUDA=OFF ..
+# [WARNING]: Do we really want opencv to use python3? I guess so, but not sure.
+# [WARNING]: The following command take around 1 hour or more
+sudo make install
+pkg-config --modversion opencv
+# we can confirm with
+python3 -c 'import cv2; print(cv2); print(cv2.getBuildInformation())'
+# We should copy this so file later to our python venv!
+cp /usr/local/lib/python3.6/dist-packages/cv2/python-3.6/cv2.cpython-36m-aarch64-linux-gnu.so //home/aspen/Agroscope/Python_venvironments/YOLO_v5_venv/lib/python3.6/site-packages
+```
+
+# Updating opencv to 4.5.3
+Im having issues with realsense, more details [here](https://github.com/IntelRealSense/realsense-ros/issues/2326)
+```bash
+cd 
+cd Agroscope/Data_processing/2_realtime/tools/software
+wget https://github.com/opencv/opencv/archive/refs/tags/4.5.3.zip
+unzip 4.5.3.zip
+rm 4.5.3.zip
+cd opencv-4.5.3
+mkdir build && cd build
+cmake -D CMAKE_BUILD_TYPE=RELEASE \
+-D CMAKE_INSTALL_PREFIX=/usr/local \
+-D WITH_CUDA=OFF ..
+# [WARNING]: The following command take around 2 hours or more
+sudo make install
+# Checking version :D
+pkg-config --modversion opencv
+# we can confirm with both of these commands:
+jtop 
+python3 -c 'import cv2; print(cv2); print(cv2.getBuildInformation())'
+# Again, We should copy this so file later to our python venv!
+cp /usr/local/lib/python3.6/dist-packages/cv2/python-3.6/cv2.cpython-36m-aarch64-linux-gnu.so /home/aspen/Agroscope/Python_venvironments/YOLO_v5_venv/lib/python3.6/site-packages
+# We should check it
+source /home/$USER/Agroscope/Python_venvironments/YOLO_v5_venv/bin/activate
+python3 -c 'import cv2; print(cv2); print(cv2.getBuildInformation())'
+deactivate
+# In case we have problems with realsense-ros
+cd /usr/include
+sudo ln -s opencv4 opencv # Create a symbolic link from opencv to opencv4
+
+```
+
 
 ## ***2 ROS***
 - We will use ROS melodic as has work without problems so far
@@ -171,7 +239,7 @@ cd Agroscope/Data_processing/2_realtime/tools/software
 git clone https://github.com/Livox-SDK/Livox-SDK.git
 cd Livox-SDK
 cd build
-cmake .. -DCMAKE_TOOLCHAIN_FILE=/home/aspen/Agroscope/Data_processing/2_realtime/tools/software/vcpkg/scripts/buildsystems/vcpkg.cmake
+cmake .. #-DCMAKE_TOOLCHAIN_FILE=/home/aspen/Agroscope/Data_processing/2_realtime/tools/software/vcpkg/scripts/buildsystems/vcpkg.cmake
 make
 sudo make install
 ```
@@ -192,7 +260,7 @@ cd Agroscope/Data_processing/2_realtime/ROS/src
 git clone https://github.com/Camilochiang/livox_ros_driver.git
 cd ..
 catkin_make
-echo "source /Agroscope/Data_processing/2_realtime/ROS/devel/setup.bash" >> .bashrc
+echo "source Agroscope/Data_processing/2_realtime/ROS/devel/setup.bash" >> .bashrc
 ```
 And we can test it 
 ```bash
@@ -238,6 +306,12 @@ roslaunch realsense2_camera rs_agroscope.launch
 ```
 **Version 2:**
 ```bash
+# First we have to clean the previus one
+sudo apt remove ros-melodic-realsense2-camera
+sudo apt remove ros-melodic-ddynamic-reconfigure
+sudo apt remove ros-melodic-librealsense2
+
+sudo apt install ros-melodic-ddynamic-reconfigure
 # Following: https://github.com/IntelRealSense/realsense-ros/issues/1967#issuecomment-1029789663
 cd
 echo "export CUDA_HOME=/usr/local/cuda" >> .bashrc
@@ -252,37 +326,156 @@ rm v2.43.0.zip
 cd librealsense-2.43.0
 mkdir build
 cd build
-cmake ../ -DFORCE_RSUSB_BACKEND=ON -DBUILD_PYTHON_BINDINGS:bool=true -DPYTHON_EXECUTABLE=/usr/bin/python3.6 -DCMAKE_BUILD_TYPE=release -DBUILD_EXAMPLES=true -DBUILD_GRAPHICAL_EXAMPLES=true -DBUILD_WITH_CUDA:bool=true
-make -j4
+cmake -DFORCE_RSUSB_BACKEND=ON \
+-DBUILD_PYTHON_BINDINGS:bool=true \
+-DPYTHON_EXECUTABLE=/usr/bin/python3.6 \
+-DCMAKE_BUILD_TYPE=release \
+-DBUILD_EXAMPLES=true \
+-DBUILD_GRAPHICAL_EXAMPLES=true \
+-DBUILD_WITH_CUDA:bool=true ..
+make -j16
 sudo make install
 # If everything works, the camera should show up
 rs-enumerate-devices
 ```
 
 And now the wrapper: 
-First lets move some files to the card
+First lets move some files to its rigth place
 ```bash
 cd
 sudo cp /home/aspen/Agroscope/ASPEN/Software/lib/99-realsense-libusb.rules /etc/udev/rules.d/
 sudo udevadm control --reload-rules && udevadm trigger
-sudo cp /home/aspen/Agroscope/ASPEN/Software/transfer/rs_agroscope.launch /opt/ros/melodic/share/realsense2_camera/launch
+sudo cp /home/aspen/Agroscope/ASPEN/Software/transfer/rs_agroscope.launch /home/aspen/Agroscope/ASPEN/Software/ROS/src/realsense-ros-2.2.23/realsense2_camera/launch
 ```
 And now install the wrapper
 ```bash
-cd /home/aspen/Agroscope/Others
+cd /home/aspen/Agroscope/ASPEN/Software/ROS/src
 wget https://github.com/IntelRealSense/realsense-ros/archive/refs/tags/2.2.23.zip
-unzip realsense-ros-2.2.23.zip
-rm realsense-ros-2.2.23.zip
-cd realsense-ros-2.2.23/realsense2_camera
+unzip 2.2.23.zip
+rm 2.2.23.zip
 # Before continue there are some problems to fix:
 # https://github.com/IntelRealSense/realsense-ros/issues/910 -> add std:: in front of find_if when is missing (2 places I believe)
-catkin_make
-echo "source ~/catkin_ws/devel/setup.bash" >> .bashrc
+catkin_init_workspace
+cd ..
+catkin_make clean 
+catkin_make -DCATKIN_ENABLE_TESTING=False -DCMAKE_BUILD_TYPE=Release 
+catkin_make install
+```
+For details of rs_agroscope.launch, check ASPEN/Software/ctrl/debug/20220419_RS_configuration.md. We can test it with:
+```bash
+source /home/$USER/Agroscope/ASPEN/Software/ROS/devel/setup.bash
+roslaunch realsense2_camera rs_camera.launch
+```
+
+## Try 3 Opencv 3.4.16 no CUDA / firmware 5.13.0.50 /lib 2.50 / wrapper 2.3.2
+Is not working. lets update all to the last version
+```bash
+#FIRMWARE
+cd Agroscope/ASPEN/Software/transfer/
+rs-fw-update -f Signed_Image_UVC_5_13_0_50.bin
+
+#LibRealSense
+cd /home/$USER/Agroscope/Others
+sudo rm -r librealsense-2.43.0
+wget https://github.com/IntelRealSense/librealsense/archive/refs/tags/v2.50.0.zip
+unzip v2.50.0.zip
+rm v2.50.0.zip
+cd librealsense-2.50.0
+mkdir build && cd build
+# For CUDA SUPPORT:
+cmake -DFORCE_RSUSB_BACKEND=ON \
+-DBUILD_PYTHON_BINDINGS=true \
+-DPYTHON_EXECUTABLE=/usr/bin/python3.6 \
+-DCMAKE_BUILD_TYPE=release \
+-DBUILD_EXAMPLES=true \
+-DBUILD_GRAPHICAL_EXAMPLES=true \
+-DBUILD_WITH_CUDA=true ..
+
+# on my pc is not working..
+sudo apt-get 
+
+#ROS wrapper
+cd /home/aspen/Agroscope/ASPEN/Software/ROS/src
+#wget https://github.com/IntelRealSense/realsense-ros/archive/refs/tags/2.3.2.zip
+# I had to download it manualy
+unzip 2.3.2.zip
+rm 2.3.2.zip
+catkin_init_workspace
+cd ..
+catkin_make clean
+catkin_make -DCATKIN_ENABLE_TESTING=False -DCMAKE_BUILD_TYPE=Release
+catkin_make install
+
+source /home/$USER/Agroscope/ASPEN/Software/ROS/devel/setup.bash
+
+# We can move our configuration
+sudo cp /home/aspen/Agroscope/ASPEN/Software/transfer/rs_agroscope.launch /opt/ros/melodic/share/realsense2_camera/launch
+roslaunch realsense2_camera rs_agroscope.launch
+```
+
+## Try 4: Opencv 4.5.3 / firmware 5.12.12.100 / lib 2.43.0 / wrapper 2.2.23
+```bash
 cd
-source .bashrc
+cd Agroscope/ASPEN/Software/transfer/
+rs-fw-update -f Signed_Image_UVC_5_12_12_100.bin
+
+#LibRealSense
+cd /home/$USER/Agroscope/Others
+sudo rm -r librealsense-2.50.0
+wget https://github.com/IntelRealSense/librealsense/archive/refs/tags/v2.43.0.zip
+unzip librealsense-2.43.0.zip
+rm librealsense-2.43.0.zip
+cd librealsense-2.43.0
+mkdir build && cd build
+cmake -DFORCE_RSUSB_BACKEND=ON \
+-DBUILD_PYTHON_BINDINGS=true \
+-DPYTHON_EXECUTABLE=/usr/bin/python3.6 \
+-DCMAKE_BUILD_TYPE=release \
+-DBUILD_EXAMPLES=true \
+-DBUILD_GRAPHICAL_EXAMPLES=true \
+-DBUILD_WITH_CUDA=true ..
+make -j4
+sudo make install
+
+#Checking dynamic presence
+sudo apt install ros-melodic-ddynamic-reconfigure
+
+#Wrapper
+cd /home/aspen/Agroscope/ASPEN/Software/ROS/src
+wget https://github.com/IntelRealSense/realsense-ros/archive/refs/tags/2.2.23.zip
+unzip 2.2.23.zip
+rm 2.2.23.zip
+catkin_init_workspace
+cd ..
+catkin_make clean
+catkin_make -DCATKIN_ENABLE_TESTING=False -DCMAKE_BUILD_TYPE=Release
+catkin_make install
+
+source /home/$USER/Agroscope/ASPEN/Software/ROS/devel/setup.bash
+roslaunch realsense2_camera rs_camera.launch
 
 ```
-For details of rs_agroscope.launch, check ASPEN/Software/ctrl/debug/20220419_RS_configuration.md
+
+# Another solution:
+So basically if librealsense is working i can try with python
+
+
+# Note: remove spatial filter maybe later. if CPU usage is too high
+https://github.com/IntelRealSense/realsense-ros
+https://github.com/IntelRealSense/librealsense/blob/master/doc/installation_jetson.md#building-from-source-using-native-backend
+https://github.com/IntelRealSense/realsense-ros/issues/2176
+
+
+
+Another option for the wrapper:
+```bash
+sudo apt list -a ros-melodic-realsense2-camera
+sudo apt-get remove ros-melodic-realsense2-camera
+sudo apt-get remove ros-melodic-realsense2-description
+
+
+```
+
 
 ## ***3. Python***
 - We will be using python 3.6 and a virtual_env so:
@@ -308,7 +501,8 @@ python3 -m pip install --upgrade pip
 #https://stackoverflow.com/questions/65631801/illegal-instructioncore-dumped-error-on-jetson-nano
 # It look that numpy has a problem with jetson, so we need a specific version
 python3 -m pip install numpy==1.19.4
-python3 -m pip install opencv-python
+#python3 -m pip install opencv-python Not sure if I need this oone as i have my local version 
+cp /usr/local/lib/python3.6/dist-packages/cv2/python-3.6/cv2.cpython-36m-aarch64-linux-gnu.so /home/aspen/Agroscope/Python_venvironments/YOLO_v5_venv/lib/python3.6/site-packages/
 python3 -m pip install kivy
 python3 -m pip install pygame
 python3 -m pip install screeninfo
@@ -337,22 +531,6 @@ Check that torch is working and using CUDA
 ```python3
 import torch
 torch.cuda.is_available()
-```
-
-- OpenCV will be used later for R3LIVE, but need to be installed diferently
-```bash
-cd 
-cd Agroscope/Data_processing/2_realtime/tools/software
-wget https://github.com/opencv/opencv/archive/3.4.16.zip
-unzip 3.4.16.zip
-rm 3.4.16.zip
-cd opencv-3.4.16
-mkdir build
-cd build
-# [WARNING]: The following command take around 1 hour or more
-cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_TOOLCHAIN_FILE=/home/aspen/Agroscope/Data_processing/2_realtime/tools/software/vcpkg/scripts/buildsystems/vcpkg.cmake
-sudo make install
-pkg-config --modversion opencv
 ```
 
 # ***4. BMI088***
@@ -462,14 +640,73 @@ rostopic echo /camera/color/camera_info
 ## COMPRESING
 So I tried compressing images and with ROS2 jetson can only do 19 FPS at 1920 x 1080. as 15 FPS is more than enough, we will keep both, deepth and nmormal at 15 FPS, recorded as compressed
 
-
-
-
-
-
-
-
+## Check opencv
+pkg-config --modversion opencv
 
 
 # Usefull links
 https://www.jetsonhacks.com/nvidia-jetson-xavier-nx-gpio-header-pinout/
+
+
+# Fixing opencv
+```bash
+sudo find -name librealsense2_camera.so
+# If the file is in two places (that should be: ROS and /opt/ros), delete the librealsense2_camera.so file in the/home/xxx/catkin_ws/devel/lib/path
+```
+
+# Fixing the mess with librealsense and ROS wrapper
+- We want ROS wrapper to be installed from source. For this the first step is to clean up previus instalations
+```bash
+# Removing librealsense
+sudo apt purge *librealsense2*
+# Removing ros wrapper
+sudo apt remove ros-melodic-realsense2-camera
+sudo apt remove ros-melodic-librealsense2
+cd
+# Now we can check that nothing is here
+cd /opt/ros/melodic/include
+ls -l | grep librealsense
+```
+
+- LibRealSense:
+- On PC: 
+```
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE
+sudo add-apt-repository "deb https://librealsense.intel.com/Debian/apt-repo $(lsb_release -cs) main" -u
+sudo apt-get install librealsense2-dkms
+sudo apt-get install librealsense2-utils
+sudo apt-get install librealsense2-dev
+sudo apt-get install librealsense2-dbg
+```
+
+- Wrapper:
+- On PC
+```
+
+```
+
+- Now we want to use my own version of opencv
+- My own version of image_transport 
+    For this we need two things:
+    1. My workspace need to be defined first in the variable ROS_PACKAGE_PATH (Which we can check with printenv | grep ROS_PACKAGE_PATH). This is basically the case when we source a new catkin_workspace.
+    2. Your *include_directories* directives set up so that your _local_ packages appear first ie: include_directories( include ${excellent_package_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} )
+
+- Installing realsense-ros from source
+```bash
+cd /home/$USER/Agroscope/ASPEN/Software/ROS/src
+wget https://github.com/IntelRealSense/realsense-ros/archive/refs/tags/2.3.2.zip
+unzip 2.3.2.zip
+rm 2.3.2.zip
+
+# Then, I modify /home/ubuntu/Agroscope/ASPEN/Software/ROS/src/realsense-ros-2.3.2/realsense2_camera/CMakeLists.txt So it find opencv :D in my PC!
+catkin_init_workspace
+cd ..
+catkin_make clean
+catkin_make -DCATKIN_ENABLE_TESTING=False -DCMAKE_BUILD_TYPE=Release
+catkin_make install
+```
+
+
+
+
+

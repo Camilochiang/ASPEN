@@ -23,12 +23,8 @@ done
 	export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.6 >> $log 2>&1
 	#sudo netplan apply
 	echo "$now: ROS melodic prepared" >> $log
-	# Load livox and realsense drivers
-	# Livox 
-	source /home/ubuntu/Agroscope/Data_processing/2_realtime/ROS_spaces/ROS_workspace_3/devel/setup.bash >> $log 2>&1
-	#source "/home/ubuntu/Agroscope/Data_processing/2_realtime/ROS/devel/setup.bash" >> $log 2>&1
-	# BMI088
-	#source "/home/$USER/Agroscope/ASPEN/Software/ROS/devel/setup.bash" >> $log 2>&1	
+	# Load livox, realsense and BMI088 drivers
+	source /home/$USER/Agroscope/ASPEN/Software/ROS/devel/setup.bash >> $log 2>&1
 	now=$(date)	
 	echo "$now: ROS drivers loaded [Livox, BMIO088]" >> $log
 	#Python env

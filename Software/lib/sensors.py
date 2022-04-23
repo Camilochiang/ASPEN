@@ -248,7 +248,6 @@ class battery_handler():
     def get_charge_remining_time():
         return(i2cbus.read_word_data(self.i2caddress,0x11))
 
-
 # ---------- Sony camera ---------------
 class sony_camera():
     def __init__(self, gpio_focus, gpio_image, gpio_detector):
