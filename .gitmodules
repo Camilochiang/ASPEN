@@ -1,0 +1,6 @@
+[submodule "Software/ROS/src/livox_ros_driver_external_IMU"]
+	path = Software/ROS/src/livox_ros_driver_external_IMU
+	url = https://github.com/Camilochiang/livox_ros_driver_external_IMU
+[submodule "Software/ROS/src/r3live"]
+	path = Software/ROS/src/r3live
+	url = https://github.com/Camilochiang/r3live
