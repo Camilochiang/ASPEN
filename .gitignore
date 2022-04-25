@@ -2,4 +2,3 @@ build
 devel
 install
 .catkin_workspace
-Software/ROS/src/CMakeLists.txt
