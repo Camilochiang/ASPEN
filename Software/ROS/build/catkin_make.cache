@@ -1,2 +1,0 @@
-bmi088:image_transport_plugins/compressed_depth_image_transport:image_transport_plugins/compressed_image_transport:image_transport_plugins/image_transport_plugins:image_transport_plugins/theora_image_transport:livox_ros_driver_external_IMU/livox_ros_driver:r3live/r3live:realsense-ros-2.3.2/realsense2_camera:realsense-ros-2.3.2/realsense2_description
--DCATKIN_ENABLE_TESTING=False -DCMAKE_BUILD_TYPE=Release -DCATKIN_DEVEL_PREFIX=/home/ubuntu/Agroscope/ASPEN/Software/ROS/devel -DCMAKE_INSTALL_PREFIX=/home/ubuntu/Agroscope/ASPEN/Software/ROS/install -G Unix Makefiles
