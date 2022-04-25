@@ -571,3 +571,43 @@ NODES
 [1mNo processes to monitor[0m
 shutting down processing monitor...
 ... shutting down processing monitor complete
+... logging to /home/ubuntu/.ros/log/73b94468-c30b-11ec-8ea9-0242b9b475dc/roslaunch-ubuntu-2914.log
+Checking log directory for disk usage. This may take a while.
+Press Ctrl-C to interrupt
+Done checking log file disk usage. Usage is <1GB.
+]2;roscore
+[1mstarted roslaunch server http://localhost:37637/[0m
+ros_comm version 1.14.13
+
+
+SUMMARY
+========
+
+PARAMETERS
+ * /rosdistro: melodic
+ * /rosversion: 1.14.13
+
+NODES
+
+auto-starting new master
+[1mprocess[master]: started with pid [2969][0m
+[1mROS_MASTER_URI=http://localhost:11311/[0m
+]2;roscore http://localhost:11311/
+[1msetting /run_id to 73b94468-c30b-11ec-8ea9-0242b9b475dc[0m
+[1mprocess[rosout-1]: started with pid [3003][0m
+started core service [/rosout]
+[rosout-1] killing on exit
+[master] killing on exit
+shutting down processing monitor...
+... shutting down processing monitor complete
+[1mdone[0m
+ 
+Sa Apr 23 22:29:57 CEST 2022: Device started
+/home/ubuntu/Agroscope/ASPEN/Software/ctrl/Agroscope_startup.sh: line 19: /opt/ros/melodic/setup.sh: No such file or directory
+Sa Apr 23 22:29:57 CEST 2022: ROS melodic prepared
+Sa Apr 23 22:29:57 CEST 2022: ROS drivers loaded [Livox, BMIO088]
+Sa Apr 23 22:29:57 CEST 2022: Agroscope venv loaded
+/home/ubuntu/Agroscope/ASPEN/Software/ctrl/Agroscope_startup.sh: line 35: roscore: command not found
+/home/ubuntu/Agroscope/ASPEN/Software/ctrl/Agroscope_startup.sh: line 36: roslaunch: command not found
+/home/ubuntu/Agroscope/ASPEN/Software/ctrl/Agroscope_startup.sh: line 37: roslaunch: command not found
+Sa Apr 23 22:29:57 CEST 2022: Livox, RS and IMU ROSlaunch started

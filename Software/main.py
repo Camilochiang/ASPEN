@@ -85,7 +85,7 @@ class MainApp(App):
             print('Writing to' + self.pwd)
             # Start recording
             # If is possible we should record compressed topics for camara/color and camara/depth, if not , raw will do it
-            self.record_bag = pexpect.spawn('rosbag record -j -o ' +  self.pwd + '/captured/ROS/' + ' /livox/lidar /imu /camera/color/image_raw /camera/depth/image_rect_raw/compressed /rosout_agg __name:=my_bag')
+            self.record_bag = pexpect.spawn('rosbag record -j -o ' +  self.pwd + '/captured/ROS/' + ' /livox/lidar /imu /camera/color/image_raw /camera/aligned_depth_to_color/image_raw /rosout_agg __name:=my_bag')
             while not self.record_bag.eof():
                 strLine = self.record_bag.readline()
                 if 'Subscribing to /rosout_agg' in strLine.decode():

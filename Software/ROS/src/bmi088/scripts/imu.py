@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import rospy
 import subprocess
 from sensor_msgs.msg import Imu
@@ -43,7 +42,7 @@ class ImuMessages(object):
         rate = rospy.Rate(hz) # 10hz
         print("Starting to publish")
         while not rospy.is_shutdown():
-            rospy.loginfo(msg)
+            #rospy.loginfo(msg)
             values = thread.stdout.readline().split(",")
             #msg.angular_velocity = Vector3(values[0], values[0], values[0])
             #msg.linear_acceleration = Vector3(x, y, z)            

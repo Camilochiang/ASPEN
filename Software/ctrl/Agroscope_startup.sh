@@ -34,7 +34,10 @@ done
 	
 	roscore >> $log 2>&1 &
 	roslaunch realsense2_camera rs_agroscope.launch --wait >> $log 2>&1 &
+	sleep 2
 	roslaunch livox_ros_driver livox_lidar_msg.launch --wait >> $log 2>&1 &
+	sleep 2
+	#rosrun bmi088 imu.py  &
 	now=$(date)
 	echo "$now: Livox, RS and IMU ROSlaunch started" >> $log 
 
@@ -44,7 +47,7 @@ done
 	while true; do
 		topiclist=$(rostopic list)
 		topiclist=(${topiclist/|/ })
-		if [ ${topiclist[0]} == "/camera/align_to_color/parameter_descriptions" ]; then
+		if [ ${topiclist[0]} == "/camera/aligned_depth_to_color/camera_info" ]; then
 			val=100; sleep 1; echo $val
 			break
 		fi
@@ -61,7 +64,6 @@ done
 	while true;do
 		sleep 1
 	done
-	#rosrun bmi088 imu.py  &
 
 } || {
 	echo "$now: Agroscope startup failed." >> $log

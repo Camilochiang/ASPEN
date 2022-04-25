@@ -8,6 +8,9 @@ import numpy as np
 import time
 from threading import Thread
 
+#Notes:
+#20210425 The touch screen is detecting two touchs, So i had to change this file with small time.sleeps and disabling the buttons during that time
+
 class Button(Factory.Button):
     __events__ = ('on_press', )
 

@@ -129,7 +129,7 @@ sudo /usr/sbin/nvpmodel -m
 
 - We have to update Cmake for librealsense
 ```bash
-sudo apt remove --purge --auto-remove cmake
+#sudo apt remove --purge --auto-remove cmake
 sudo apt update
 sudo apt install -y software-properties-common lsb-release
 sudo apt clean all
@@ -255,19 +255,12 @@ We can test it to: NOT SURE HOW TO CHECK THAT IS WORKING
 - As we have an external IMU we will be using a custom version of the livos_ros_driver. More details here https://github.com/hku-mars/r2live/issues/56
 ```bash
 cd
-cd Agroscope/Data_processing/2_realtime/ROS/src
+cd Agroscope/ASPEN/Software/ROS/src
 #scp -r /home/ubuntu/Agroscope/Data_processing/2_realtime/ROS_spaces/ROS_workspace_3/src/livox_ros_driver_for_R2LIVE aspen@192.168.0.46:
-git clone https://github.com/Camilochiang/livox_ros_driver.git
-cd ..
-catkin_make
-echo "source Agroscope/Data_processing/2_realtime/ROS/devel/setup.bash" >> .bashrc
+git clone https://github.com/Camilochiang/livox_ros_driver_external_IMU.git
 ```
-And we can test it 
-```bash
-cd
-source .bashrc
-roslaunch livox_ros_driver livox_lidar_msg.launch
-```
+we can test it later.
+
 ### 2.1.1 Wifi and Ethernet connection
 - Preparing our network: From the manual
 ***All Mid-70 sensors are set to static IP address mode by default with an IP address of 192.168.1.XX. The default subnet is 255.255.255.0 and gateways are 192.168.1.1***
@@ -409,7 +402,7 @@ catkin_make install
 source /home/$USER/Agroscope/ASPEN/Software/ROS/devel/setup.bash
 
 # We can move our configuration
-sudo cp /home/aspen/Agroscope/ASPEN/Software/transfer/rs_agroscope.launch /opt/ros/melodic/share/realsense2_camera/launch
+sudo cp /home/$USER/Agroscope/ASPEN/Software/transfer/rs_agroscope.launch /opt/ros/melodic/share/realsense2_camera/launch
 roslaunch realsense2_camera rs_agroscope.launch
 ```
 
@@ -454,10 +447,16 @@ catkin_make install
 source /home/$USER/Agroscope/ASPEN/Software/ROS/devel/setup.bash
 roslaunch realsense2_camera rs_camera.launch
 
+#WORKING! :D
+cp /home/$USER/Agroscope/ASPEN/Software/transfer/rs_agroscope.launch /home/aspen/Agroscope/ASPEN/Software/ROS/src/realsense-ros-2.2.23/realsense2_camera/launch
+roslaunch realsense2_camera rs_agroscope.launch
 ```
 
-# Another solution:
-So basically if librealsense is working i can try with python
+Now that we have everything in ROS, we can also test the lidar
+```bash
+roslaunch livox_ros_driver livox_lidar_msg.launch
+```
+
 
 
 # Note: remove spatial filter maybe later. if CPU usage is too high
