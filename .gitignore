@@ -1,4 +1,5 @@
 /ASPEN/Software/ROS/build
 /ASPEN/Software/ROS/devel
 /ASPEN/Software/ROS/install
+/ASPEN/Software/ROS/.catkin_workspace
 /ASPEN/Software/ROS/src/CMakeLists.txt
