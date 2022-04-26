@@ -10,7 +10,6 @@ GPIO.setup(channel_hotshoe, GPIO.IN)
 GPIO.setup(channel_focus, GPIO.OUT, initial = GPIO.HIGH)
 GPIO.setup(channel_image, GPIO.OUT, initial = GPIO.HIGH)
 
-
 def callback_fn(channel):
    print('Edge detected') 
 

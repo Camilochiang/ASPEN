@@ -705,7 +705,26 @@ catkin_make -DCATKIN_ENABLE_TESTING=False -DCMAKE_BUILD_TYPE=Release
 catkin_make install
 ```
 
+source /home/ubuntu/Agroscope/Data_processing/2_realtime/ROS/devel/setup.bash
 
 
+
+
+
+Error with lz4
+```bash
+sudo mv /usr/include/flann/ext/lz4.h /usr/include/flann/ext/lz4.h.bak
+sudo mv /usr/include/flann/ext/lz4hc.h /usr/include/flann/ext/lz4.h.bak
+
+sudo ln -s /usr/include/lz4.h /usr/include/flann/ext/lz4.h
+sudo ln -s /usr/include/lz4hc.h /usr/include/flann/ext/lz4hc.h
+```
+
+
+# preparing gitthub
+- You can add a a submodule like this:
+cd /home/ubuntu/Agroscope/ASPEN/Software/ROS/src
+git submodule add https://github.com/Camilochiang/livox_ros_driver_external_IMU
+git submodule add https://github.com/Camilochiang/r3live
 
 

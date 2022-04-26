@@ -11,16 +11,24 @@ import pexpect
 import Jetson.GPIO as GPIO
 import time
 import threading
+import rospy
 
 GPIO.setmode(GPIO.BOARD)
 GPIO.setwarnings(False)
 
 # ---------- Altum-----------------------
 class altum_camera():
-    def __init__(self, device, address, path):
+    def __init__(self, device, address, gpio_detector, path_pwd):
         self.device = device
         self.address = address
-        self.dir_output = path
+        self.detector = gpio_detector
+        self.image_counter = 0        
+        self.file = open(path_pwd + '/captured/altum/' + os.path.basename(os.path.normpath(path_pwd)) + '.txt', "a")
+
+        GPIO.setup(self.detector, GPIO.IN)
+
+        GPIO.add_event_detect(self.detector, GPIO.RISING, callback=self.write_time)
+        rospy.init_node('Altum_camera', anonymous=False)
 
     def is_alive(self):
         PARAMS = 'status'
@@ -73,11 +81,6 @@ class altum_camera():
                 break
 
     def capture(self, status, interval):
-        # Take a series of pictures 
-        starting_file = datetime.datetime.now().strftime("%Y%m%d_%H_%M_%S")
-        file = open(self.dir_output + '/' + starting_file + '.txt', 'w')
-        file.close()
-
         while True:
             starting_time = datetime.datetime.now()
             PARAMS = 'capture' + '?' + 'block=true'
@@ -92,10 +95,6 @@ class altum_camera():
                     pass
                 else:
                     end_time = datetime.datetime.now()
-                    file = open(self.dir_output + '/' + starting_file + '.txt', 'a')
-                    file.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + '\n')
-                    file.close()
-                    print('ALTUM : picture at ' + end_time.strftime("%Y-%m-%d %H:%M:%S.%f"))                    
                     break
             
             delta_time = end_time - starting_time
@@ -105,7 +104,11 @@ class altum_camera():
             time.sleep(delta_time)
 
             if status():
+                self.file.close()               
                 break
+
+    def write_time(self):
+        self.file.write(str(self.image_counter) + "\t" + str(rospy.get_rostime()))
     
     def camera_position(self):
         #get GPS information
@@ -250,26 +253,26 @@ class battery_handler():
 
 # ---------- Sony camera ---------------
 class sony_camera():
-    def __init__(self, gpio_focus, gpio_image, gpio_detector):
+    def __init__(self, gpio_focus, gpio_image, gpio_detector, path_pwd):
         self.focus = gpio_focus
         self.image = gpio_image
         self.detector = gpio_detector
-        self.running = True
         self.image_counter = 0
+        self.file = open(path_pwd + '/captured/pictures/' + os.path.basename(os.path.normpath(path_pwd)) + '.txt', "a")
 
+        GPIO.setup(self.detector, GPIO.IN)
         GPIO.setup(self.focus, GPIO.OUT, initial = GPIO.HIGH)
         GPIO.setup(self.image, GPIO.OUT, initial = GPIO.HIGH)
-        GPIO.setup(self.detector, GPIO.IN)
 
         GPIO.add_event_detect(self.detector, GPIO.FALLING, callback=self.write_time)
+        rospy.init_node('Sony_camera', anonymous=False)
 
     def is_alive(self):
         #ToDO
         return True
     
-    def capture_start(self, time_s, time_file_path):
-        self.file = open(time_file_path, "a")
-        while True and self.running:
+    def capture(self, status, time_s):
+        while True:
             GPIO.output(self.focus, GPIO.LOW)
             GPIO.output(self.image, GPIO.LOW)
             time.sleep(1)
@@ -278,9 +281,9 @@ class sony_camera():
             GPIO.output(self.image, GPIO.HIGH)
             time.sleep(time_s - 1)
 
-    def capture_stop(self):
-        self.running = False        
-        self.file.close()
+            if status():
+                self.file.close()
+                break
 
     def write_time(self):
-        self.file.write(str(self.image_counter) + "\t" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'))
+        self.file.write(str(self.image_counter) + "\t" + str(rospy.get_rostime()))

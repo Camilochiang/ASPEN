@@ -41,16 +41,12 @@ from kivy.uix.button import Button
 from kivy.graphics import Color, Rectangle
 from kivy.clock import Clock
 
-
 #ROS
 import rospy
 from sensor_msgs.msg import Image as Image_ROS
 #ASPEN
-#from lib import sensors
+from lib import sensors
 from lib import helpers
-### Python sensors
-#Altum = sensors.altum_camera(device ='Camera_1', address = "http://192.168.10.254",  path = directory)
-#Sony = sensors.sony_camera()
 
 # Main class
 class MainApp(App):
@@ -67,8 +63,8 @@ class MainApp(App):
             self.machine_learning = False
         else:
             self.machine_learning = True
-        self.default_time_sony = 5
-        self.default_time_altum = 5
+        self.default_time_sony = 3
+        self.default_time_altum = 3
         self.count = 0
         self.previus_counts = []
         self.previus_dics = [] # This one is list but it will have dictionaries inside!
@@ -82,6 +78,16 @@ class MainApp(App):
             self.altum.disabled = True                        
             self.button_model.disabled = True
 
+            # Start recording with the other cameras
+            #Altum
+            self.altum_thread_status = False
+            self.altum_thread = Thread(target = self.altum_camera.capture, args=(lambda: self.altum_thread_status, self.default_time_altum), daemon = True)
+            self.altum_thread.start()
+            #Sony
+            self.sony_thread_status = False
+            self.sony_thread = Thread(target = self.sony_camera.capture, args=(lambda: self.sony_thread_status, self.default_time_sony), daemon = True)
+            self.sony_thread.start()
+
             print('Writing to' + self.pwd)
             # Start recording
             # If is possible we should record compressed topics for camara/color and camara/depth, if not , raw will do it
@@ -90,17 +96,14 @@ class MainApp(App):
                 strLine = self.record_bag.readline()
                 if 'Subscribing to /rosout_agg' in strLine.decode():
                     break
-            # Activate cameras (Altum and Sony) and logs
-            # Altum
-            status_altum = False
-            #thread_altum = threading.Thread(target = Altum.capture, args=(lambda: status_altum, self.default_time_altum), daemon = True)
-            #thread_altum.start()
-            # Sony
 
             self.status_bar_updater('Recording', 0,0,1,.2)
 
         else: 
+            self.altum_thread_status = True
+            self.sony_thread_status = True
             self.stopper_bag = pexpect.spawn('rosnode kill /my_bag')
+
             while True:
                 strLine = self.stopper_bag.read()
                 if 'killed' in strLine.decode():
@@ -305,15 +308,6 @@ class MainApp(App):
 
             self._clockev = Clock.schedule_interval(self.loading_model_banner, self.loading_model_banner_timer[1]*0.1)
 
-
-            # We load the model to be use in a diferent thread
-            #rospy.signal_shutdown()
-            #rospy.init_node('GUI-YOLOv5', anonymous=False)            
-            #print(1)
-            #self.spin_thread = Thread(target=lambda: rospy.spin(), daemon=True)
-            #self.spin_thread.start()            
-            #self.model_thread = Thread(target=detected_agroscope.run(), args=(self.crop,), daemon=True)
-            #self.model_thread.start()
 
     def loading_model_banner(self, time_int):
         # Creating banner       
@@ -535,6 +529,14 @@ class MainApp(App):
         self._clockev_ROS = Clock.schedule_interval(self.check_up, 1)
         # We will create a directory everytime that we start the app
         self.pwd = helpers.create_folders()
+        ### Python sensors if we are in aspen
+        if os.getlogin() == 'aspen':
+            self.altum_camera = sensors.altum_camera(device ='Camera_1',
+                address = "http://192.168.10.254",
+                gpio_detector = 7,
+                path_pwd = self.pwd)
+            self.sony_camera = sensors.sony_camera(gpio_focus = 31, gpio_image = 33, gpio_detector = 15,
+                path_pwd = self.pwd)
     
     def close(self, touch):
         print('call close')
@@ -599,4 +601,4 @@ if __name__== "__main__":
     app.yolov5_thread.close()
     print("Closing GUI")
     app.on_close()  
-    sys.exit()  
+    sys.exit()
