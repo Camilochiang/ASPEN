@@ -75,23 +75,28 @@ class MainApp(App):
             # If you are recording, block all the other buttons
             self.button_distance.disabled = True
             self.sony.disabled = True
-            self.altum.disabled = True                        
+            self.altum.disabled = True
             self.button_model.disabled = True
 
             # Start recording with the other cameras
             #Altum
-            self.altum_thread_status = False
-            self.altum_thread = Thread(target = self.altum_camera.capture, args=(lambda: self.altum_thread_status, self.default_time_altum), daemon = True)
-            self.altum_thread.start()
+            if self.altum.text == 'Altum: \n ON':
+                self.altum_thread = Thread(target = self.altum_camera.capture, args=[self.default_time_altum], daemon = True)
+                self.altum_thread.start()
             #Sony
-            self.sony_thread_status = False
-            self.sony_thread = Thread(target = self.sony_camera.capture, args=(lambda: self.sony_thread_status, self.default_time_sony), daemon = True)
-            self.sony_thread.start()
+            if self.sony.text == 'Sony: \n ON':
+                self.sony_thread = Thread(target = self.sony_camera.capture, args=[self.default_time_sony], daemon = True)
+                self.sony_thread.start()
 
-            print('Writing to' + self.pwd)
-            # Start recording
-            # If is possible we should record compressed topics for camara/color and camara/depth, if not , raw will do it
-            self.record_bag = pexpect.spawn('rosbag record -j -o ' +  self.pwd + '/captured/ROS/' + ' /livox/lidar /imu /camera/color/image_raw /camera/aligned_depth_to_color/image_raw /rosout_agg __name:=my_bag')
+            print('[MAIN    ]: Writing to' + self.pwd)
+            # When compressing the more demading is compressing images from realsense:
+            #   Compression Imu_losses  Weight(mb)
+            #   img compress -lz4  19% 136
+            #   img compress - none 14% 610
+            #   img raw -lz4  7% 375        # Basically this is my best option. Can the algorithm hold it?
+            #   img raw -none   0%  930
+            self.record_bag = pexpect.spawn('rosbag record --split --duration=1m -j --lz4 -o ' +  self.pwd + '/captured/ROS/' + ' /livox/lidar /imu /camera/color/image_raw /camera/aligned_depth_to_color/image_raw /rosout_agg __name:=my_bag')
+            #self.record_bag = pexpect.spawn('rosbag record -j -o ' +  self.pwd + '/captured/ROS/' + ' /livox/lidar /imu /camera/color/image_raw /camera/aligned_depth_to_color/image_raw /rosout_agg __name:=my_bag')
             while not self.record_bag.eof():
                 strLine = self.record_bag.readline()
                 if 'Subscribing to /rosout_agg' in strLine.decode():
@@ -100,8 +105,10 @@ class MainApp(App):
             self.status_bar_updater('Recording', 0,0,1,.2)
 
         else: 
-            self.altum_thread_status = True
-            self.sony_thread_status = True
+            if self.altum.text == 'Altum: \n ON':
+                self.altum_camera.thread_controler = False
+            if self.sony.text == 'Sony: \n ON':    
+                self.sony_camera.thread_controler = False
             self.stopper_bag = pexpect.spawn('rosnode kill /my_bag')
 
             while True:
@@ -112,7 +119,7 @@ class MainApp(App):
                 time.sleep(0.1)
 
             self.button_status.text = "Recording: \n OFF"
-            self.button_status.color = [.0,0,0,1]            
+            self.button_status.color = [.0,0,0,1]
             self.button_distance.disabled = False
             self.button_model.disabled = False
             self.sony.disabled = False
@@ -152,7 +159,7 @@ class MainApp(App):
         with self.button_distance_val.canvas:
             Color(1,1,0,.15)
             Rectangle(pos=(self.button_distance_val.pos_hint['center_x']*800 -22.5,
-                self.button_distance_val.pos_hint['center_y']*480 - 22.5), size = (45,45))                
+                self.button_distance_val.pos_hint['center_y']*480 - 22.5), size = (45,45))
         
         self.rl.add_widget(self.button_distance_val)
 
@@ -215,15 +222,15 @@ class MainApp(App):
                 self.altum.disabled = True 
                 self.button_model.disabled = True
                 self.button_counter.disabled = True
-                self.button_status.disabled = True                
+                self.button_status.disabled = True
             elif sensor == 'Sony':
                 self.button_distance.disabled = True
                 self.altum.disabled = True 
                 self.button_model.disabled = True
                 self.button_counter.disabled = True
-                self.button_status.disabled = True                
+                self.button_status.disabled = True
             else:
-                self.button_distance.disabled = True                
+                self.button_distance.disabled = True
                 self.sony.disabled = True
                 self.button_model.disabled = True
                 self.button_counter.disabled = True
@@ -249,7 +256,7 @@ class MainApp(App):
     def change_model(self, x_center, y_center):
         return 1
         ##ToDO: Change model inside of app
-        self.button_model.open = not self.button_model.open     
+        self.button_model.open = not self.button_model.open
 
         if self.button_model.open:
             self.button_model_1 = Button(size_hint =(.15, .1),
@@ -318,11 +325,11 @@ class MainApp(App):
             
         else:
             self.loading_model_banner_timer[0] = 0
-            self.rl.remove_widget(self.loading_model_label)            
+            self.rl.remove_widget(self.loading_model_label)
             self._clockev.cancel()
             
             self.sony.disabled = False
-            self.altum.disabled = False             
+            self.altum.disabled = False
             self.button_counter.disabled = False
             self.button_distance.disabled = False
             self.button_status.disabled = False 
@@ -347,7 +354,7 @@ class MainApp(App):
         self.status_bar.bind(size=self.status_bar.setter('text_size')) 
         with self.status_bar.canvas:
             Color(r,g,b,a)
-            Rectangle(pos=(0,0), size = self.status_bar.size)        
+            Rectangle(pos=(0,0), size = self.status_bar.size)
         self.rl.add_widget(self.status_bar)
     
     def check_up(self, _):
@@ -408,7 +415,7 @@ class MainApp(App):
         self.button_counter = helpers.Button(size_hint =(.1, .1),
             pos_hint ={'center_x':.95, 'center_y':.10},
             text ="Count: \n" + str(self.count),
-            halign = 'center',            
+            halign = 'center',
             bold = True,
             color = [.8,0,0,1],
             background_color = [1,1,0,.2],
@@ -443,7 +450,7 @@ class MainApp(App):
         self.button_status = helpers.FadingButton(size_hint =(.1, .1),
             pos_hint ={'center_x':.55, 'center_y':.10},
             text ="Recording: \n OFF",
-            halign = 'center',            
+            halign = 'center',
             bold = True,
             color = [.0,0,0,1],
             background_color = [1,1,0,.2],
@@ -454,7 +461,7 @@ class MainApp(App):
             pos_hint ={'center_x':0.075, 'center_y':.95},
             sensor_name ="Sony",
             text = 'Sony: \n ON',
-            halign = 'center',            
+            halign = 'center',
             bold = True,
             color = [.8,0,0,1],
             background_color = [1,1,0,.2],
@@ -464,7 +471,7 @@ class MainApp(App):
             pos_hint ={'center_x':.175, 'center_y':.95},
             sensor_name ="Altum",
             text = 'Altum: \n ON',
-            halign = 'center',            
+            halign = 'center',
             bold = True,
             color = [.8,0,0,1],
             background_color = [1,1,0,.2],
@@ -490,7 +497,7 @@ class MainApp(App):
             Color(0,1,0,.2)
             Rectangle(pos=(0,0), size = self.status_bar.size)
         self.rl.add_widget(self.status_bar)
-  
+
         #ROS management
         #rospy.init_node('GUI', anonymous=False)
         
@@ -539,7 +546,7 @@ class MainApp(App):
                 path_pwd = self.pwd)
     
     def close(self, touch):
-        print('call close')
+        print("[MAIN   ]: Clossing app")
         quit()
 
     def on_close(self):
@@ -555,7 +562,7 @@ class MainApp(App):
                 for idx, _ in enumerate(self.previus_counts):
                     f.write('Total count:' + str(self.previus_counts[idx]) + '\n')
                     f.write(json.dumps(self.previus_dics[idx]) + '\n')
-                    f.write('\n')            
+                    f.write('\n')
 
     def update(self, dt):
         if self.machine_learning:
@@ -567,14 +574,14 @@ class MainApp(App):
             # convert it to texture
             buf1 = cv2.flip(self.last_frame, 0)
             buf = buf1.tostring()
-            texture1 = Texture.create(size=(self.last_frame.shape[1], self.last_frame.shape[0]), colorfmt='bgr') 
+            texture1 = Texture.create(size=(self.last_frame.shape[1], self.last_frame.shape[0]), colorfmt='rgb') 
             #if working on RASPBERRY PI, use colorfmt='rgba' here instead, but stick with "bgr" in blit_buffer. 
-            texture1.blit_buffer(buf, colorfmt='bgr', bufferfmt='ubyte')
+            texture1.blit_buffer(buf, colorfmt='rgb', bufferfmt='ubyte')
             # display image from the texture
             self.img1.texture = texture1
         except:
             pass
-        
+
         files = os.listdir(self.pwd + '/captured/ROS/')
         if len(files) > 0 and self.button_status.text == "Recording: \n OFF":
             files.sort()
@@ -584,7 +591,7 @@ class MainApp(App):
                 self.status_bar_updater('Ready to GO!', 0,1,0,.2)
 
         # We update the counter
-        if self.machine_learning:        
+        if self.machine_learning:
             self.count = len(self.YOLOv5.objects_characteristics['id'])
             self.button_counter.text = "Count: \n" + str(self.count)
 
@@ -600,5 +607,5 @@ if __name__== "__main__":
     # We need to close the other threads!
     app.yolov5_thread.close()
     print("Closing GUI")
-    app.on_close()  
+    app.on_close()
     sys.exit()

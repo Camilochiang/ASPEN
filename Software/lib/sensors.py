@@ -2,15 +2,12 @@
 # The main goal of this script is to allow comunication with the different sensors
 # ---------- Libraries --------------
 #from smbus2 import SMBus
-import subprocess
 import requests
 import time
 import datetime
 import os
-import pexpect
 import Jetson.GPIO as GPIO
 import time
-import threading
 import rospy
 
 GPIO.setmode(GPIO.BOARD)
@@ -19,16 +16,22 @@ GPIO.setwarnings(False)
 # ---------- Altum-----------------------
 class altum_camera():
     def __init__(self, device, address, gpio_detector, path_pwd):
+        self.path_pwd = path_pwd
         self.device = device
         self.address = address
         self.detector = gpio_detector
         self.image_counter = 0        
-        self.file = open(path_pwd + '/captured/altum/' + os.path.basename(os.path.normpath(path_pwd)) + '.txt', "a")
+        self.thread_controler = True
+
+        self.file_path = self.path_pwd + '/captured/altum/' + os.path.basename(os.path.normpath(self.path_pwd)) + '.txt'
+        self.file = open(self.file_path, "w")
+        self.file.close()
 
         GPIO.setup(self.detector, GPIO.IN)
 
-        GPIO.add_event_detect(self.detector, GPIO.RISING, callback=self.write_time)
-        rospy.init_node('Altum_camera', anonymous=False)
+        # For a none known reason GPIO is not working inside of Kivy properly.
+        #GPIO.add_event_detect(self.detector, GPIO.RISING, callback=self.write_time)
+        #rospy.init_node('Altum_camera', anonymous=False)
 
     def is_alive(self):
         PARAMS = 'status'
@@ -40,7 +43,7 @@ class altum_camera():
                 return False
         except:
             return False
-        
+
     def detect_pannel(self):
         #Detect QR pannel
         PARAMS = 'capture'+'?'+'block=true'+'&'+'detect_panel=true'
@@ -80,8 +83,9 @@ class altum_camera():
             else:
                 break
 
-    def capture(self, status, interval):
-        while True:
+    def capture(self, interval):
+        print("[SENSORS]: Starting Altum")
+        while True and self.thread_controler:
             starting_time = datetime.datetime.now()
             PARAMS = 'capture' + '?' + 'block=true'
             
@@ -96,34 +100,36 @@ class altum_camera():
                 else:
                     end_time = datetime.datetime.now()
                     break
+
+            self.file = open(self.file_path, "a")        
+            self.file.write(str(self.image_counter) + "\t" + str(rospy.get_rostime()))
+            self.file.write('\n')
+            self.file.close()
+            self.image_counter += 1
             
             delta_time = end_time - starting_time
             delta_time = interval - delta_time.seconds - delta_time.microseconds/(10**6)
             if delta_time < 0:
                 delta_time = 0
             time.sleep(delta_time)
+        #Close the file
+        self.thread_controler = True
+        self.image_counter = 0
 
-            if status():
-                self.file.close()               
-                break
-
-    def write_time(self):
-        self.file.write(str(self.image_counter) + "\t" + str(rospy.get_rostime()))
-    
     def camera_position(self):
         #get GPS information
         PARAMS = 'gps'
         response = requests.get(self.address+'/'+PARAMS)
         response.json()
         print(response.json())
-        
+
     def camera_orientation(self):
         #Get or set camera orientation
         PARAMS = 'orientation'
         response = requests.get(self.address+'/'+PARAMS)
         response.json()
         print(response.json())
-    
+
     def dls_imu(self):
         # Get values from imu, where angles are in radians and accelerometer in ms-2
         PARAMS = 'dls_imu'
@@ -207,7 +213,7 @@ class altum_camera():
                         time.sleep(0.1)
                     delete_set = requests.get(self.address + '/' + 'deletefile' + '/' + PARAMS_set)
                     time.sleep(0.1)
-    
+
     def camera_power_down(self, mode='post'):
         # See if the camera is ready to go down or we can set it to be ready.
         PARAMS = 'powerdownready'
@@ -254,36 +260,44 @@ class battery_handler():
 # ---------- Sony camera ---------------
 class sony_camera():
     def __init__(self, gpio_focus, gpio_image, gpio_detector, path_pwd):
+        self.path_pwd = path_pwd
         self.focus = gpio_focus
         self.image = gpio_image
         self.detector = gpio_detector
         self.image_counter = 0
-        self.file = open(path_pwd + '/captured/pictures/' + os.path.basename(os.path.normpath(path_pwd)) + '.txt', "a")
+        self.thread_controler = True
+
+        self.file_path = self.path_pwd + '/captured/pictures/' + os.path.basename(os.path.normpath(self.path_pwd)) + '.txt'
+        self.file = open(self.file_path, "w")
+        self.file.close()
 
         GPIO.setup(self.detector, GPIO.IN)
         GPIO.setup(self.focus, GPIO.OUT, initial = GPIO.HIGH)
         GPIO.setup(self.image, GPIO.OUT, initial = GPIO.HIGH)
 
-        GPIO.add_event_detect(self.detector, GPIO.FALLING, callback=self.write_time)
-        rospy.init_node('Sony_camera', anonymous=False)
+        #GPIO.add_event_detect(self.detector, GPIO.RISING, callback=self.write_time)
+        # note: GPIO event detect is working but not inside of kivy. not sure why...
+        #rospy.init_node('Sony_camera', anonymous=False)
 
     def is_alive(self):
         #ToDO
         return True
-    
-    def capture(self, status, time_s):
-        while True:
+
+    def capture(self, time_s):
+        while True and self.thread_controler:
             GPIO.output(self.focus, GPIO.LOW)
             GPIO.output(self.image, GPIO.LOW)
             time.sleep(1)
-            self.image_counter += 1
             GPIO.output(self.focus, GPIO.HIGH)
             GPIO.output(self.image, GPIO.HIGH)
+
+            self.file = open(self.file_path, "a")
+            self.file.write(str(self.image_counter) + "\t" + str(rospy.get_rostime()))
+            self.file.write('\n')
+            self.file.close()
+            self.image_counter += 1
+
             time.sleep(time_s - 1)
 
-            if status():
-                self.file.close()
-                break
-
-    def write_time(self):
-        self.file.write(str(self.image_counter) + "\t" + str(rospy.get_rostime()))
+        self.thread_controler = True
+        self.image_counter = 0

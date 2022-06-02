@@ -164,7 +164,7 @@ def create_folders():
     zeros.append(max_folder)
     max_folder= ''.join(zeros)
 
-    directory = output_path + '/SET_' + str(max_folder)
+    directory = output_path + '/Data/SET_' + str(max_folder)
     os.mkdir(directory)
     os.mkdir(directory + '/captured')
     os.mkdir(directory + '/captured/altum')

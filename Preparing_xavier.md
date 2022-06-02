@@ -510,6 +510,7 @@ python3 -m pip install pyyaml
 python3 -m pip install rospkg
 python3 -m pip install ffpyplayer
 python3 -m pip install pillow
+python3 -m pip install Jetson.GPIO
 
 #Torch, from https://cognitivexr.at/blog/2021/03/11/installing-pytorch-and-yolov5-on-an-nvidia-jetson-xavier-nx.html
 python3 -m pip install -U future psutil dataclasses typing-extensions pyyaml tqdm seaborn
@@ -728,3 +729,23 @@ git submodule add https://github.com/Camilochiang/livox_ros_driver_external_IMU
 git submodule add https://github.com/Camilochiang/r3live
 
 
+# Mounting SSD card
+```bash
+lsblk
+# Format the disk:
+# sudo mkfs.ext4 /dev/nvme0n1
+sudo mkdir /home/aspen/Agroscope/Data
+sudo mount /dev/nvme0n1 /home/aspen/Agroscope/Data
+# We can check space with : df -h
+# We want to mount automatically so
+sudo echo "/dev/nvme0n1 /home/aspen/Agroscope/Data ext4 defaults 0 1" >> /etc/fstab
+# And we give permit to my user to write on it
+sudo chmod +777 /home/aspen/Agroscope/Data
+```
+
+## 20220520
+After recording some bags (and it looks that is working), is time to start analysing some data.
+    First we will implement a boundary box extraction for data analysis
+    Second, meanwhile we wait for FAST-LIVO, we will add the depth frame to the algorithm
+
+We start today by creating a new ROS package that is wrapper of yolo v5 , sort and also draw polygons arround fruits
