@@ -749,3 +749,7 @@ After recording some bags (and it looks that is working), is time to start analy
     Second, meanwhile we wait for FAST-LIVO, we will add the depth frame to the algorithm
 
 We start today by creating a new ROS package that is wrapper of yolo v5 , sort and also draw polygons arround fruits
+
+
+@@ 20220602
+I have been working in the tracker. Tried specially a C++ implementation of sort and is not really working as it compite with r3live in resources. I will re try with python sort even if it take a bit of longer time to process. Also the idea is that if you see a tomate for more than 10 frames then it should produce a ros message. (something like that). I should also try with the realtime implementation of bytetrack. I have hopes on that one 

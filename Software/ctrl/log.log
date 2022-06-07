@@ -1162,3 +1162,167 @@ Do Jun  2 09:36:05 CEST 2022: Agroscope venv loaded
 [31mRLException: [livox_lidar_msg.launch] is neither a launch file in package [livox_ros_driver] nor is [livox_ros_driver] a launch file name[0m
 [31mThe traceback for the exception was written to the log file[0m
 Do Jun  2 09:36:09 CEST 2022: Livox, RS and IMU ROSlaunch started
+... logging to /home/ubuntu/.ros/log/a9537044-e246-11ec-874d-02421363cab6/roslaunch-ubuntu-2869.log
+Checking log directory for disk usage. This may take a while.
+Press Ctrl-C to interrupt
+Done checking log file disk usage. Usage is <1GB.
+]2;roscore
+[1mstarted roslaunch server http://localhost:42007/[0m
+ros_comm version 1.14.13
+
+
+SUMMARY
+========
+
+PARAMETERS
+ * /rosdistro: melodic
+ * /rosversion: 1.14.13
+
+NODES
+
+auto-starting new master
+[1mprocess[master]: started with pid [2921][0m
+[1mROS_MASTER_URI=http://localhost:11311/[0m
+]2;roscore http://localhost:11311/
+[1msetting /run_id to a9537044-e246-11ec-874d-02421363cab6[0m
+[1mprocess[rosout-1]: started with pid [2932][0m
+started core service [/rosout]
+[rosout-1] killing on exit
+[master] killing on exit
+shutting down processing monitor...
+... shutting down processing monitor complete
+[1mdone[0m
+ 
+Fr Jun  3 07:27:00 CEST 2022: Device started
+Fr Jun  3 07:27:00 CEST 2022: ROS melodic prepared
+/home/ubuntu/Agroscope/ASPEN/Software/ctrl/Agroscope_startup.sh: line 27: /home/ubuntu/Agroscope/ASPEN/Software/ROS/devel/setup.bash: No such file or directory
+Fr Jun  3 07:27:00 CEST 2022: ROS drivers loaded [Livox, BMIO088]
+Fr Jun  3 07:27:00 CEST 2022: Agroscope venv loaded
+[31mRLException: [rs_agroscope.launch] is neither a launch file in package [realsense2_camera] nor is [realsense2_camera] a launch file name[0m
+[31mThe traceback for the exception was written to the log file[0m
+[31mRLException: [livox_lidar_msg.launch] is neither a launch file in package [livox_ros_driver] nor is [livox_ros_driver] a launch file name[0m
+[31mThe traceback for the exception was written to the log file[0m
+Fr Jun  3 07:27:04 CEST 2022: Livox, RS and IMU ROSlaunch started
+... logging to /home/ubuntu/.ros/log/cb2c741a-e2fd-11ec-8079-024217d43229/roslaunch-ubuntu-2876.log
+Checking log directory for disk usage. This may take a while.
+Press Ctrl-C to interrupt
+Done checking log file disk usage. Usage is <1GB.
+]2;roscore
+[1mstarted roslaunch server http://localhost:40217/[0m
+ros_comm version 1.14.13
+
+
+SUMMARY
+========
+
+PARAMETERS
+ * /rosdistro: melodic
+ * /rosversion: 1.14.13
+
+NODES
+
+auto-starting new master
+[1mprocess[master]: started with pid [2938][0m
+[1mROS_MASTER_URI=http://localhost:11311/[0m
+]2;roscore http://localhost:11311/
+[1msetting /run_id to cb2c741a-e2fd-11ec-8079-024217d43229[0m
+[1mprocess[rosout-1]: started with pid [2949][0m
+started core service [/rosout]
+[rosout-1] killing on exit
+[master] killing on exit
+shutting down processing monitor...
+... shutting down processing monitor complete
+[1mdone[0m
+ 
+Fr Jun  3 12:36:18 CEST 2022: Device started
+Fr Jun  3 12:36:18 CEST 2022: ROS melodic prepared
+/home/ubuntu/Agroscope/ASPEN/Software/ctrl/Agroscope_startup.sh: line 27: /home/ubuntu/Agroscope/ASPEN/Software/ROS/devel/setup.bash: No such file or directory
+Fr Jun  3 12:36:18 CEST 2022: ROS drivers loaded [Livox, BMIO088]
+Fr Jun  3 12:36:18 CEST 2022: Agroscope venv loaded
+[31mRLException: [rs_agroscope.launch] is neither a launch file in package [realsense2_camera] nor is [realsense2_camera] a launch file name[0m
+[31mThe traceback for the exception was written to the log file[0m
+[31mRLException: [livox_lidar_msg.launch] is neither a launch file in package [livox_ros_driver] nor is [livox_ros_driver] a launch file name[0m
+[31mThe traceback for the exception was written to the log file[0m
+Fr Jun  3 12:36:22 CEST 2022: Livox, RS and IMU ROSlaunch started
+... logging to /home/ubuntu/.ros/log/00c02c4a-e329-11ec-b763-0242199f7b5d/roslaunch-ubuntu-2713.log
+Checking log directory for disk usage. This may take a while.
+Press Ctrl-C to interrupt
+Done checking log file disk usage. Usage is <1GB.
+]2;roscore
+[1mstarted roslaunch server http://localhost:40025/[0m
+ros_comm version 1.14.13
+
+
+SUMMARY
+========
+
+PARAMETERS
+ * /rosdistro: melodic
+ * /rosversion: 1.14.13
+
+NODES
+
+auto-starting new master
+[1mprocess[master]: started with pid [2765][0m
+[1mROS_MASTER_URI=http://localhost:11311/[0m
+]2;roscore http://localhost:11311/
+[1msetting /run_id to 00c02c4a-e329-11ec-b763-0242199f7b5d[0m
+[1mprocess[rosout-1]: started with pid [2776][0m
+started core service [/rosout]
+[rosout-1] killing on exit
+[master] killing on exit
+shutting down processing monitor...
+... shutting down processing monitor complete
+[1mdone[0m
+ 
+Fr Jun  3 13:11:46 CEST 2022: Device started
+Fr Jun  3 13:11:46 CEST 2022: ROS melodic prepared
+/home/ubuntu/Agroscope/ASPEN/Software/ctrl/Agroscope_startup.sh: line 27: /home/ubuntu/Agroscope/ASPEN/Software/ROS/devel/setup.bash: No such file or directory
+Fr Jun  3 13:11:46 CEST 2022: ROS drivers loaded [Livox, BMIO088]
+Fr Jun  3 13:11:46 CEST 2022: Agroscope venv loaded
+[31mRLException: [rs_agroscope.launch] is neither a launch file in package [realsense2_camera] nor is [realsense2_camera] a launch file name[0m
+[31mThe traceback for the exception was written to the log file[0m
+[31mRLException: [livox_lidar_msg.launch] is neither a launch file in package [livox_ros_driver] nor is [livox_ros_driver] a launch file name[0m
+[31mThe traceback for the exception was written to the log file[0m
+Fr Jun  3 13:11:50 CEST 2022: Livox, RS and IMU ROSlaunch started
+... logging to /home/ubuntu/.ros/log/f51f8e12-e32d-11ec-a0d1-0242ac7ff0b7/roslaunch-ubuntu-2806.log
+Checking log directory for disk usage. This may take a while.
+Press Ctrl-C to interrupt
+Done checking log file disk usage. Usage is <1GB.
+]2;roscore
+[1mstarted roslaunch server http://localhost:35747/[0m
+ros_comm version 1.14.13
+
+
+SUMMARY
+========
+
+PARAMETERS
+ * /rosdistro: melodic
+ * /rosversion: 1.14.13
+
+NODES
+
+auto-starting new master
+[1mprocess[master]: started with pid [2862][0m
+[1mROS_MASTER_URI=http://localhost:11311/[0m
+]2;roscore http://localhost:11311/
+[1msetting /run_id to f51f8e12-e32d-11ec-a0d1-0242ac7ff0b7[0m
+[1mprocess[rosout-1]: started with pid [2873][0m
+started core service [/rosout]
+[rosout-1] killing on exit
+[master] killing on exit
+shutting down processing monitor...
+... shutting down processing monitor complete
+[1mdone[0m
+ 
+So Jun  5 15:35:57 CEST 2022: Device started
+So Jun  5 15:35:57 CEST 2022: ROS melodic prepared
+/home/ubuntu/Agroscope/ASPEN/Software/ctrl/Agroscope_startup.sh: line 27: /home/ubuntu/Agroscope/ASPEN/Software/ROS/devel/setup.bash: No such file or directory
+So Jun  5 15:35:58 CEST 2022: ROS drivers loaded [Livox, BMIO088]
+So Jun  5 15:35:58 CEST 2022: Agroscope venv loaded
+[31mRLException: [rs_agroscope.launch] is neither a launch file in package [realsense2_camera] nor is [realsense2_camera] a launch file name[0m
+[31mThe traceback for the exception was written to the log file[0m
+[31mRLException: [livox_lidar_msg.launch] is neither a launch file in package [livox_ros_driver] nor is [livox_ros_driver] a launch file name[0m
+[31mThe traceback for the exception was written to the log file[0m
+So Jun  5 15:36:02 CEST 2022: Livox, RS and IMU ROSlaunch started
