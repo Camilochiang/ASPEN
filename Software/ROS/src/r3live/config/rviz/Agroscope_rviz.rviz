@@ -20,7 +20,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: YOLOv5 + SORT
+    SyncSource: YOLOv5 + OC_SORT
   - Class: rviz/Displays
     Help Height: 138
     Name: Displays
@@ -46,7 +46,7 @@ Panels:
     Name: Views
     Splitter Ratio: 0.5
 Preferences:
-  PromptSaveOnExit: true
+  PromptSaveOnExit: false
 Toolbars:
   toolButtonStyle: 2
 Visualization Manager:
@@ -2055,7 +2055,7 @@ Visualization Manager:
       Name: RGB_map
     - Class: rviz/Image
       Enabled: true
-      Image Topic: /YOLOv5_pub
+      Image Topic: /YOLOv5/out_image
       Max Value: 1
       Median window: 5
       Min Value: 0
@@ -2067,7 +2067,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /ASPEN_3D_detections
+      Marker Topic: /ASPEN/3D_detections
       Name: MarkerArray
       Namespaces:
         "": true

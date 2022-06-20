@@ -23,25 +23,11 @@ r3live_vio:
       0.0,  1368.414794921875, 552.1774291992188,
       0.0, 0.0, 1.0 ] 
    camera_dist_coeffs: [0, 0, 0, 0, 0]  #k1, k2, p1, p2, k3
-   #camera_dist_coeffs: [-0.01841394411245675, 1.403767536853783, -0.004610713008191326, -0.005306367151226178, -3.079483857895877]  #k1, k2, p1, p2, k3
-   # Fine extrinsic value. Calculated with livox_camera_calib.
    camera_ext_R:
          [-0.00194289, 0.0704677, 0.997512,
             -0.999996,  0.0021402, -0.00209891,
             -0.00228278,  -0.997512,  0.0704632]
-   #camera_ext_R:
-   #      [0.0129924, -0.0115002, 0.999849,
-   #         -0.999817,  -0.0141637, 0.0128291,
-   #         0.014014,  -0.999834,  -0.0116821]
-   # camera_ext notes: 
-   #camera_ext_t: [-0.0139635, 0.0542981, -0.0104072] 
    camera_ext_t: [0.211551,0.0985947,0.0757836] 
-   # Rough extrinsic value, form CAD model, is not correct enough, but can be online calibrated in our datasets.
-   # camera_ext_R:
-   #    [0, 0, 1,
-   #     -1, 0, 0,
-   #     0, -1, 0]
-   # camera_ext_t: [0,0,0] 
    
 r3live_lio:        
    lio_update_point_step: 4   # Point step used for LIO update.  

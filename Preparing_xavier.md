@@ -753,3 +753,6 @@ We start today by creating a new ROS package that is wrapper of yolo v5 , sort a
 
 @@ 20220602
 I have been working in the tracker. Tried specially a C++ implementation of sort and is not really working as it compite with r3live in resources. I will re try with python sort even if it take a bit of longer time to process. Also the idea is that if you see a tomate for more than 10 frames then it should produce a ros message. (something like that). I should also try with the realtime implementation of bytetrack. I have hopes on that one 
+
+# Trying to link to python3
+catkin_make -DCATKIN_ENABLE_TESTING=False -DCMAKE_BUILD_TYPE=Release
