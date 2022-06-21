@@ -1,3 +1,5 @@
+[20220621] : A modified copy of R3live to use an external IMU. More info [here](https://github.com/hku-mars/r3live)
+
 # R3LIVE
 ## A Robust, Real-time, RGB-colored, LiDAR-Inertial-Visual tightly-coupled state Estimation and mapping package
 
