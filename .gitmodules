@@ -7,6 +7,3 @@
 [submodule "Software/ROS/src/yolov5"]
 	path = Software/ROS/src/yolov5
 	url = https://github.com/Camilochiang/yolov5
-[submodule "Software/ROS/r3live"]
-	path = Software/ROS/r3live
-	url = https://github.com/Camilochiang/r3live
