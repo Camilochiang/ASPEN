@@ -18,9 +18,11 @@ This file have as goal to describe the software configuration that is used in th
 8. Icons
 
 ## General configuration
-- Create a copy as indicate here: https://developer.nvidia.com/embedded/learn/get-started-jetson-xavier-nx-devkit#intro
+- Install Jetson Pack 4.6.2 into your jetson xavier NX module using nvidia SDK Manager. If you are using a developer kit, you can create a copy of it using a sd card, as indicate it [here](https://developer.nvidia.com/embedded/learn/get-started-jetson-xavier-nx-devkit#intro)
+- 
 - Connect to your local wifi
 - We need to copy the repository for the tool
+
 ```bash
 #uname -m
 cd
@@ -756,3 +758,7 @@ I have been working in the tracker. Tried specially a C++ implementation of sort
 
 # Trying to link to python3
 catkin_make -DCATKIN_ENABLE_TESTING=False -DCMAKE_BUILD_TYPE=Release
+
+## 22020629
+I have a look to the altum camera data. It look that the GPS do not connect so we cannot use it. Can we can do is to may be use the IMU from the DSL2, but the data is not soo much.
+I also decided to try [FAST_LIO_PC](https://github.com/yanliang-wang/FAST_LIO_LC) to see if it work better for closing 

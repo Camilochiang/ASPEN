@@ -18,3 +18,15 @@ ASPEN project rely in several other works, here mentioned:
 
 ## Warning:
 This repository is research in process!
+
+## ToDO:
+Several improvements are in the pipeline of the project. Either contributions or personal work from the author can implement them in the near future
+- [ ] Allow diferent objet detection algorithms
+- [ ] Implement [YOLOv6](https://github.com/meituan/YOLOv6)
+- [ ] Speed calculator for optimal high resolution cover
+- [ ] Expose LiDAR intensity values
+- [ ] Point cloud colorizing using multispectral values (radiance)
+- [ ] Point cloud correction using DSL2 light sensor for radiance to reflectance transformation
+- [ ] Implement SLAM loop closure using [A-LOAM](https://github.com/gisbi-kim/FAST_LIO_SLAM) or similar
+- [ ] GPS integration for point cloud alignment as postprocesing
+- [ ] Tool transference to rover car for automatic data adquisition
