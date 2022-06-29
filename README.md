@@ -22,6 +22,7 @@ This repository is research in process!
 ## ToDO:
 Several improvements are in the pipeline of the project. Either contributions or personal work from the author can implement them in the near future
 - [ ] Allow diferent objet detection algorithms
+- [ ] Allow different tracking algorithms
 - [ ] Implement [YOLOv6](https://github.com/meituan/YOLOv6)
 - [ ] Speed calculator for optimal high resolution cover
 - [ ] Expose LiDAR intensity values
