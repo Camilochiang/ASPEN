@@ -1,0 +1,12 @@
+# pip install -r requirements.txt
+# base ----------------------------------------
+screeninfo
+#tkinter
+Pillow>=7.1.2
+kivy>=2.0
+pexpect
+pyyaml
+pygame
+rospkg
+ffpyplayer
+Jetson.GPIO

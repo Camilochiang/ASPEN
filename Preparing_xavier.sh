@@ -3,7 +3,7 @@
 # Starting point:
 # Create a copy as indicate here: https://developer.nvidia.com/embedded/learn/get-started-jetson-xavier-nx-devkit#intro
 
-# 0. Wifi 
+# 0. General configuration: Sensor check and Wifi 
 # 1. ROS
 # 2. Python
 # 	2.1 Python env
@@ -12,6 +12,9 @@
 #	3.2 R3Live
 #	3.3 Yolov5
 # 4. Touch screen
+
+
+
 
 # Granting permits
 sudo usermod -aG sudo aspen
@@ -300,3 +303,4 @@ chmod +777 Startup.log
 
 # Then we restart
 sudo reboot
+

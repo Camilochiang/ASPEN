@@ -21,6 +21,7 @@ This repository is research in process!
 
 ## ToDO:
 Several improvements are in the pipeline of the project. Either contributions or personal work from the author can implement them in the near future
+- [ ] Add depth to color matrix transformation for better alignments between object detection (2D) and point cloud (3D)
 - [ ] Allow diferent objet detection algorithms
 - [ ] Allow different tracking algorithms
 - [ ] Implement [YOLOv6](https://github.com/meituan/YOLOv6)

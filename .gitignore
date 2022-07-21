@@ -1,4 +1,7 @@
 build
 devel
 install
+image_transport_plugins
+r3live
+yolov5
 .catkin_workspace
